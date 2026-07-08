@@ -1,0 +1,61 @@
+<footer class="bg-dark text-light pt-5 pb-3 mt-5 border-top border-warning border-3">
+    <div class="container">
+        <div class="row gy-4">
+
+            {# Colonne 1 : À propos #}
+            <div class="col-lg-4 col-md-6">
+                <h5 class="text-warning fw-bold mb-3">🎮 GameStore</h5>
+                <p class="small text-muted">
+                    Votre destination ultime pour l'achat et la revente de jeux vidéo. Sécurisé, rapide et conforme aux normes européennes.
+                </p>
+                <p class="small text-muted">© {{ "now"|date("Y") }} GameStore. Tous droits réservés.</p>
+            </div>
+
+            {# Colonne 2 : Liens utiles #}
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold mb-3">Navigation</h5>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a href="#" class="text-secondary text-decoration-none text-white-hover">Accueil</a></li>
+                    <li class="mb-2"><a href="#" class="text-secondary text-decoration-none text-white-hover">Boutique jeux</a></li>
+                    <li class="mb-2"><a href="{{ path('app_login') }}" class="text-secondary text-decoration-none text-white-hover">Mon compte</a></li>
+                </ul>
+            </div>
+
+            {# Colonne 3 : Légal & RGPD #}
+            <div class="col-lg-4 col-md-12">
+                <h5 class="text-warning fw-bold mb-3">🔒 Conformité & RGPD</h5>
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <a href="#" class="text-secondary text-decoration-none text-white-hover">Mentions Légales</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-secondary text-decoration-none text-white-hover">Politique de Confidentialité (RGPD)</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-secondary text-decoration-none text-white-hover">Conditions Générales de Vente (CGV)</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-secondary text-decoration-none text-white-hover" onclick="alert('Ouvrir le gestionnaire de cookies'); return false;">Gestion des Cookies</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <hr class="bg-secondary my-4">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center small text-muted">
+            <p class="mb-0">Conforme au Règlement Général sur la Protection des Données (UE 2016/679)</p>
+            <div class="mt-2 mt-sm-0">
+                <span class="badge bg-secondary">🇫🇷 Serveurs hébergés en France</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .text-white-hover:hover {
+        color: #fff !important;
+        transition: color 0.2s ease-in-out;
+    }
+</style>

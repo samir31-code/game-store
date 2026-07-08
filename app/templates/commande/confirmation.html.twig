@@ -1,0 +1,188 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande confirmée — GameStore{% endblock %}
+
+{% block body %}
+<div class="py-4">
+
+    {# ── En-tête confirmation ── #}
+    <div class="text-center mb-5">
+        <h1 class="text-success">✅ Commande confirmée !</h1>
+        <p class="fs-5 text-muted">
+            Merci pour votre commande !
+            Votre numéro est : <strong class="text-dark">{{ commande.numeroCommande }}</strong>
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        {# ── Récapitulatif commande ── #}
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">📋 Récapitulatif</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Numéro</th>
+                            <td><strong>{{ commande.numeroCommande }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <td>{{ commande.dateCommande|date('d/m/Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Paiement</th>
+                            <td>
+                                {% if commande.typePaiement == 'carte' %}
+                                    💳 Carte bancaire
+                                {% elseif commande.typePaiement == 'virement' %}
+                                    🏦 Virement bancaire
+                                {% elseif commande.typePaiement == 'paypal' %}
+                                    🅿️ PayPal
+                                {% else %}
+                                    {{ commande.typePaiement }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Expédition</th>
+                            <td>
+                                {% if not commande.paiementValide %}
+                                    <span class="badge bg-danger">❌ En attente de paiement</span>
+                                {% elseif commande.statutExpedition == 'en_preparation' %}
+                                    <span class="badge bg-warning text-dark">📦 En préparation</span>
+                                {% elseif commande.statutExpedition == 'expedie' %}
+                                    <span class="badge bg-primary">🚚 Expédiée</span>
+                                {% elseif commande.statutExpedition == 'livre' %}
+                                    <span class="badge bg-success">✅ Livrée</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">⏳ En attente d'expédition</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Statut</th>
+                            <td>
+                                {% if commande.paiementValide %}
+                                    <span class="badge bg-success">✅ Payé</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">⏳ En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <table class="table table-sm mb-0">
+                        <tr>
+                            <th>Total HT</th>
+                            <td class="text-end">{{ commande.coutTotalHt }} €</td>
+                        </tr>
+                        <tr class="table-dark">
+                            <th class="text-white">Total TTC</th>
+                            <td class="text-end text-warning fw-bold fs-5">
+                                {{ commande.coutTotalTtc }} €
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# ── Détail des produits achetés ── #}
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">🛒 Produits achetés</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Produit</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-end">Prix unit. HT</th>
+                                <th class="text-end">TVA</th>
+                                <th class="text-end">Prix unit. TTC</th>
+                                <th class="text-end">Total HT</th>
+                                <th class="text-end">Total TTC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in commande.detailCommandes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ detail.produit.nom }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Réf : {{ detail.produit.referenceProduit }}
+                                    </small>
+                                    {% if detail.produit.marque %}
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ detail.produit.marque }}
+                                        </small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary fs-6">
+                                        {{ detail.quantite }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    {{ detail.coutUnitaireHt }} €
+                                </td>
+                                <td class="text-end">
+                                    {{ detail.tvaProduit }} %
+                                </td>
+                                <td class="text-end">
+                                    {{ detail.coutUnitaireTtc }} €
+                                </td>
+                                <td class="text-end">
+                                    {{ detail.coutTotalHt }} €
+                                </td>
+                                <td class="text-end fw-bold text-primary">
+                                    {{ detail.coutTotalTtc }} €
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-secondary">
+                                <td colspan="5" class="text-end fw-bold">
+                                    Sous-total HT :
+                                </td>
+                                <td colspan="2" class="text-end fw-bold">
+                                    {{ commande.coutTotalHt }} €
+                                </td>
+                            </tr>
+                            <tr class="table-dark">
+                                <td colspan="5" class="text-end fw-bold text-white">
+                                    Total TTC :
+                                </td>
+                                <td colspan="2" class="text-end fw-bold text-warning fs-5">
+                                    {{ commande.coutTotalTtc }} €
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {# ── Boutons d'action ── #}
+    <div class="d-flex gap-3 justify-content-center mt-5">
+        <a href="{{ path('commande_historique') }}" class="btn btn-primary btn-lg">
+            📋 Mes commandes
+        </a>
+        <a href="{{ path('produit_index') }}" class="btn btn-outline-secondary btn-lg">
+            ← Continuer mes achats
+        </a>
+    </div>
+
+</div>
+{% endblock %}

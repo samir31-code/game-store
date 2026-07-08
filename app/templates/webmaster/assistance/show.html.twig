@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+{% block title %}Demande #{{ demande.id }}{% endblock %}
+{% block body %}
+<h1 class="mb-4">🆘 Demande d'assistance #{{ demande.id }}</h1>
+
+<div class="row g-4">
+
+    {# Détail de la demande #}
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">📋 Détail de la demande</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Client</th>
+                        <td>
+                            {{ demande.client.prenom }}
+                            {{ demande.client.nom }}
+                            <br>
+                            <small class="text-muted">
+                                {{ demande.client.email }}
+                            </small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Sujet</th>
+                        <td><strong>{{ demande.sujet }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <td>{{ demande.dateCreation|date('d/m/Y H:i') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Statut</th>
+                        <td>
+                            {% if demande.statut == 'ouvert' %}
+                                <span class="badge bg-danger">🔴 Ouvert</span>
+                            {% elseif demande.statut == 'en_cours' %}
+                                <span class="badge bg-warning text-dark">🟡 En cours</span>
+                            {% else %}
+                                <span class="badge bg-success">🟢 Résolu</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+                <hr>
+                <h6>Description du problème :</h6>
+                <div class="bg-light p-3 rounded">
+                    {{ demande.description|nl2br }}
+                </div>
+
+                {# Afficher la réponse si elle existe #}
+                {% if demande.reponse %}
+                    <hr>
+                    <h6>Votre réponse :</h6>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        {{ demande.reponse|nl2br }}
+                    </div>
+                    <small class="text-muted">
+                        Répondu le :
+                        {{ demande.dateReponse|date('d/m/Y H:i') }}
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Formulaire de réponse #}
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">✏️ Répondre & Gérer le statut</h5>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.reponse) }}
+                    {{ form_widget(form.reponse) }}
+                    {{ form_errors(form.reponse) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.statut) }}
+                    {{ form_widget(form.statut) }}
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        📨 Envoyer la réponse
+                    </button>
+                    <a href="{{ path('webmaster_assistance_index') }}"
+                       class="btn btn-secondary">
+                        Annuler
+                    </a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Stock — Gestionnaire{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">📦 Gestion du stock</h1>
+
+{% if produits_rupture is not empty %}
+<div class="alert alert-danger">
+    ⚠️ {{ produits_rupture|length }} produit(s) en rupture de stock !
+</div>
+<h2 class="text-danger mb-3">🔴 Rupture de stock</h2>
+<table class="table table-danger table-hover mb-4">
+    <thead class="table-dark">
+        <tr>
+            <th>Référence</th>
+            <th>Produit</th>
+            <th>Mettre à jour</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produit in produits_rupture %}
+        <tr>
+            <td>{{ produit.referenceProduit }}</td>
+            <td>{{ produit.nom }}</td>
+            <td>
+                <form method="post"
+                      action="{{ path('gestionnaire_stock_update', {id: produit.id}) }}"
+                      class="d-flex gap-2">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('stock' ~ produit.id) }}">
+                    <input type="number" name="quantite"
+                           class="form-control form-control-sm"
+                           style="width:80px" value="0" min="0">
+                    <select name="etat_stock"
+                            class="form-select form-select-sm"
+                            style="width:140px">
+                        <option value="disponible">Disponible</option>
+                        <option value="rupture" selected>Rupture</option>
+                        <option value="sur_commande">Sur commande</option>
+                    </select>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        💾 Mettre à jour
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<h2 class="mb-3">🟢 Produits disponibles</h2>
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Référence</th>
+            <th>Produit</th>
+            <th>Stock actuel</th>
+            <th>Mettre à jour</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produit in produits_disponibles %}
+        <tr class="{{ produit.quantiteStock < 5 ? 'table-warning' : '' }}">
+            <td>{{ produit.referenceProduit }}</td>
+            <td>{{ produit.nom }}</td>
+            <td>
+                <span class="badge {{ produit.quantiteStock < 5 ? 'bg-warning text-dark' : 'bg-success' }}">
+                    {{ produit.quantiteStock }}
+                </span>
+                {% if produit.quantiteStock < 5 %}
+                    <small class="text-warning">⚠️ Stock faible !</small>
+                {% endif %}
+            </td>
+            <td>
+                <form method="post"
+                      action="{{ path('gestionnaire_stock_update', {id: produit.id}) }}"
+                      class="d-flex gap-2">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('stock' ~ produit.id) }}">
+                    <input type="number" name="quantite"
+                           class="form-control form-control-sm"
+                           style="width:80px"
+                           value="{{ produit.quantiteStock }}" min="0">
+                    <select name="etat_stock"
+                            class="form-select form-select-sm"
+                            style="width:140px">
+                        <option value="disponible" selected>Disponible</option>
+                        <option value="rupture">Rupture</option>
+                        <option value="sur_commande">Sur commande</option>
+                    </select>
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        💾 Mettre à jour
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('gestionnaire_index') }}" class="btn btn-secondary">← Retour</a>
+{% endblock %}

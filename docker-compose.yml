@@ -1,0 +1,45 @@
+services:
+
+  # ── Service PHP (Apache + PHP 8.2) ──────────────────────────────
+  php:
+    build:
+      context: ./docker/php
+    container_name: gamestore_php
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - '8080:80'              # Le site sera sur http://localhost:8080
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: mysql://root:root@mysql:3306/gamestore?serverVersion=8.0
+
+  # ── Service MySQL 8 ──────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: gamestore_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gamestore
+      MYSQL_USER: gamestore_user
+      MYSQL_PASSWORD: gamestore_pass
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # ── Service phpMyAdmin ───────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: gamestore_phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - '8081:80'              # phpMyAdmin sur http://localhost:8081
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:

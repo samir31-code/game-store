@@ -1,0 +1,323 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte — GameStore{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">👤 Mon compte</h1>
+
+<div class="row g-4">
+
+    {# ── Informations personnelles ── #}
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">📋 Mes informations</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Nom</th>
+                        <td>{{ user.nom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Prénom</th>
+                        <td>{{ user.prenom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    {% if user.telephone %}
+                    <tr>
+                        <th>Téléphone</th>
+                        <td>{{ user.telephone }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Rôle</th>
+                        <td>
+                            {% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}
+                                    <span class="badge bg-danger">🛡️ Admin</span>
+                                {% elseif role == 'ROLE_ADMIN_PRODUIT' %}
+                                    <span class="badge bg-warning text-dark">⚙️ Admin Produit</span>
+                                {% elseif role == 'ROLE_GESTIONNAIRE_COMMANDE' %}
+                                    <span class="badge bg-info">📦 Gestionnaire</span>
+                                {% elseif role == 'ROLE_WEBMASTER' %}
+                                    <span class="badge bg-info">🌐 Webmaster</span>
+                                {% elseif role == 'ROLE_CLIENT' %}
+                                    <span class="badge bg-primary">🛒 Client</span>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# ── Accès rapides ── #}
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">⚡ Accès rapides</h5>
+            </div>
+            <div class="card-body d-flex flex-column gap-2">
+
+                <a href="{{ path('commande_historique') }}"
+                   class="btn btn-outline-dark">
+                    📋 Mes commandes
+                </a>
+                <a href="{{ path('produit_index') }}"
+                   class="btn btn-outline-dark">
+                    🎮 Voir le catalogue
+                </a>
+                <a href="{{ path('compte_adresse_index') }}"
+                   class="btn btn-outline-dark">
+                    📍 Mes adresses
+                </a>
+
+                {# Webmaster #}
+                {% if is_granted('ROLE_WEBMASTER') and not is_granted('ROLE_ADMIN_PRODUIT') %}
+                    <hr>
+                    <a href="{{ path('webmaster_index') }}"
+                       class="btn btn-outline-info">
+                        🌐 Espace Webmaster
+                    </a>
+                    <a href="{{ path('webmaster_produit_index') }}"
+                       class="btn btn-outline-info">
+                        🛠️ Modifier les produits
+                    </a>
+                {% endif %}
+
+                {# Gestionnaire #}
+                {% if is_granted('ROLE_GESTIONNAIRE_COMMANDE') and not is_granted('ROLE_ADMIN_PRODUIT') %}
+                    <hr>
+                    <a href="{{ path('gestionnaire_index') }}"
+                       class="btn btn-outline-warning">
+                        📦 Espace Gestionnaire
+                    </a>
+                {% endif %}
+
+                {# Admin produit #}
+                {% if is_granted('ROLE_ADMIN_PRODUIT') and not is_granted('ROLE_ADMIN') %}
+                    <hr>
+                    <a href="{{ path('admin_produit_index') }}"
+                       class="btn btn-outline-warning">
+                        ⚙️ Gérer les produits
+                    </a>
+                {% endif %}
+
+                {# Admin #}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <hr>
+                    <a href="{{ path('admin_index') }}"
+                       class="btn btn-outline-danger">
+                        🛡️ Administration du site
+                    </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    {# ── Mes demandes d'assistance — uniquement pour les clients ── #}
+    {% if is_granted('ROLE_CLIENT')
+        and not is_granted('ROLE_WEBMASTER')
+        and not is_granted('ROLE_GESTIONNAIRE_COMMANDE')
+        and not is_granted('ROLE_ADMIN_PRODUIT')
+        and not is_granted('ROLE_ADMIN') %}
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">🆘 Mes demandes d'assistance</h5>
+                <div class="d-flex gap-2">
+                    {# Bouton Nouvelle demande #}
+                    <a href="{{ path('compte_assistance_new') }}"
+                       class="btn btn-warning btn-sm">
+                        ➕ Nouvelle demande
+                    </a>
+                    {# Bouton Réponses — visible seulement si des demandes existent #}
+                    {% if mes_demandes is not empty %}
+                        <button class="btn btn-info btn-sm"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#toutesLesDemandes">
+                            💬 Voir toutes mes demandes
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                {% if mes_demandes is empty %}
+                    <p class="text-muted text-center py-3">
+                        Aucune demande d'assistance pour le moment.
+                    </p>
+                {% else %}
+
+                    {# ── Résumé des statuts ── #}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card text-white bg-danger">
+                                <div class="card-body text-center py-2">
+                                    <h4>{{ mes_demandes|filter(d => d.statut == 'ouvert')|length }}</h4>
+                                    <p class="mb-0 small">🔴 Ouvertes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-white bg-warning">
+                                <div class="card-body text-center py-2">
+                                    <h4>{{ mes_demandes|filter(d => d.statut == 'en_cours')|length }}</h4>
+                                    <p class="mb-0 small">🟡 En cours</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-white bg-success">
+                                <div class="card-body text-center py-2">
+                                    <h4>{{ mes_demandes|filter(d => d.statut == 'resolu')|length }}</h4>
+                                    <p class="mb-0 small">🟢 Résolues</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ── Liste de toutes les demandes (collapse) ── #}
+                    <div class="collapse show" id="toutesLesDemandes">
+                        {% for demande in mes_demandes %}
+                        <div class="card mb-3 border-{{ demande.statut == 'resolu' ? 'success' : (demande.statut == 'en_cours' ? 'warning' : 'danger') }}">
+
+                            {# En-tête cliquable pour ouvrir/fermer #}
+                            <div class="card-header d-flex justify-content-between align-items-center"
+                                 style="cursor: pointer"
+                                 data-bs-toggle="collapse"
+                                 data-bs-target="#demande{{ demande.id }}">
+                                <div>
+                                    <strong>{{ demande.sujet }}</strong>
+                                    <small class="text-muted ms-2">
+                                        {{ demande.dateCreation|date('d/m/Y H:i') }}
+                                    </small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if demande.statut == 'ouvert' %}
+                                        <span class="badge bg-danger">🔴 Ouvert</span>
+                                    {% elseif demande.statut == 'en_cours' %}
+                                        <span class="badge bg-warning text-dark">🟡 En cours</span>
+                                    {% else %}
+                                        <span class="badge bg-success">🟢 Résolu</span>
+                                    {% endif %}
+                                    {# Indicateur de réponse #}
+                                    {% if demande.reponse %}
+                                        <span class="badge bg-info">💬 Réponse disponible</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">⏳ En attente</span>
+                                    {% endif %}
+                                    <span class="text-muted">▼</span>
+                                </div>
+                            </div>
+
+                            {# Contenu dépliable #}
+                            <div class="collapse" id="demande{{ demande.id }}">
+                                <div class="card-body">
+
+                                    {# Votre demande #}
+                                    <h6 class="text-muted">📝 Votre demande :</h6>
+                                    <div class="bg-light p-3 rounded mb-3">
+                                        {{ demande.description|nl2br }}
+                                    </div>
+
+                                    {# Réponse du webmaster #}
+                                    {% if demande.reponse %}
+                                        <h6 class="text-success">
+                                            💬 Réponse du webmaster
+                                            <small class="text-muted fw-normal">
+                                                — {{ demande.dateReponse|date('d/m/Y à H:i') }}
+                                            </small>
+                                        </h6>
+                                        <div class="bg-success bg-opacity-10 border border-success rounded p-3">
+                                            {{ demande.reponse|nl2br }}
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning mb-0">
+                                            ⏳ En attente de réponse du webmaster...
+                                        </div>
+                                    {% endif %}
+
+                                    {# Bouton supprimer si résolue #}
+                                    {% if demande.statut == 'resolu' %}
+                                        <hr>
+                                        <form method="post"
+                                              action="{{ path('compte_assistance_delete', {id: demande.id}) }}"
+                                              onsubmit="return confirm('Supprimer cette demande ?')">
+                                            <input type="hidden" name="_token"
+                                                   value="{{ csrf_token('delete' ~ demande.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                🗑️ Supprimer cette demande
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Zone de Danger (Suppression conforme RGPD) ── #}
+    <div class="col-12 mt-2">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white fw-bold">
+                🔒 Sécurité & Données personnelles
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-danger fw-bold">Supprimer définitivement mon compte</h5>
+                <p class="card-text text-muted small mb-3">
+                    Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit à l'effacement de vos données. En cliquant sur le bouton ci-dessous, vous supprimerez immédiatement et définitivement votre compte, vos adresses ainsi que votre historique. Cette action est définitive et irréversible.
+                </p>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    ⚠️ Demander la suppression de mon compte
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{# ── Fenêtre Modal Bootstrap de confirmation de suppression ── #}
+<div class="modal fade text-dark" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAccountModalLabel">🚨 Confirmation de sécurité</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous absolument sûr de vouloir supprimer votre compte <strong>GameStore</strong> ?</p>
+                <div class="alert alert-warning py-2 mb-0 small">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <strong>Attention :</strong> Vous perdrez l'accès à vos clés numériques, vos adresses enregistrées et vos factures. Aucune récupération ne sera possible.
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+
+                {# Formulaire sécurisé en POST relié à votre route de contrôleur #}
+                <form action="{{ path('compte_supprimer') }}" method="POST" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_account_' ~ user.id) }}">
+                    <button type="submit" class="btn btn-danger btn-sm fw-bold">Oui, supprimer définitivement</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

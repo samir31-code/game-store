@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil — GameStore{% endblock %}
+
+{% block body %}
+
+{# ── Bannière d'accueil ── #}
+<div class="p-5 mb-4 bg-dark text-white rounded-3">
+    <div class="container-fluid py-3 text-center">
+        <h1 class="display-4 fw-bold">🎮 GameStore</h1>
+        <p class="col-md-8 mx-auto fs-5">
+            Votre boutique en ligne de jeux vidéos et consoles
+        </p>
+        <a href="{{ path('produit_index') }}" class="btn btn-primary btn-lg">
+            Voir le catalogue
+        </a>
+    </div>
+</div>
+
+{# ── Barre de recherche ── #}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-8">
+        <form method="get" action="{{ path('produit_index') }}">
+            <div class="input-group input-group-lg">
+                <input type="text"
+                       name="q"
+                       class="form-control"
+                       placeholder="🔍 Rechercher un jeu, une console, une marque...">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Rechercher
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ── Derniers produits ── #}
+<h2 class="mb-4">🆕 Dernières nouveautés</h2>
+
+<div class="row g-4">
+    {% for produit in produits %}
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <span class="badge bg-secondary mb-2">
+                    {{ produit.categorie ? produit.categorie.nom : '-' }}
+                </span>
+                <h5 class="card-title">{{ produit.nom }}</h5>
+                <p class="text-muted small">{{ produit.marque }}</p>
+                <p class="card-text fw-bold text-primary fs-5">
+                    {{ produit.prixTtc }} €
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{{ path('produit_show', {id: produit.id}) }}"
+                   class="btn btn-outline-primary btn-sm">
+                    Voir le produit
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <p class="text-muted">Aucun produit disponible pour le moment.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

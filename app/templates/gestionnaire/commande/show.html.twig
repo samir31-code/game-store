@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande
+    {{ commande.numeroCommande }}
+{% endblock %}
+
+{% block body %}
+    <h1 class="mb-4">📋 Commande —
+        {{ commande.numeroCommande }}</h1>
+
+    <div class="row g-4">
+
+        {# Infos commande #}
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Informations</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th>Client</th>
+                            <td>{{ commande.user.prenom }}
+                                {{ commande.user.nom }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ commande.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <td>{{ commande.dateCommande|date('d/m/Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total HT</th>
+                            <td>{{ commande.coutTotalHt }}
+                                €</td>
+                        </tr>
+                        <tr>
+                            <th>Total TTC</th>
+                            <td class="fw-bold text-primary">{{ commande.coutTotalTtc }}
+                                €</td>
+                        </tr>
+                        <tr>
+                            <th>Paiement</th>
+                            <td>{{ commande.typePaiement }}</td>
+                        </tr>
+                        <tr>
+                            <th>Statut</th>
+                            <td>
+                                {% if commande.paiementValide %}
+                                    <span class="badge bg-success">✅ Payé</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">⏳ En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Actions #}
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body d-flex flex-column gap-3">
+
+                    {# Gestion dynamique du bouton Facture (Bouton Générer OU bouton Imprimer PDF) #}
+                    {% if commande.facture is defined and commande.facture is not null %}
+                        <a href="{{ path('gestionnaire_facture_pdf', {id: commande.id}) }}" target="_blank" class="btn btn-success w-100">
+                            🖨️ Voir / Imprimer la Facture PDF
+                        </a>
+                    {% else %}
+                        <form method="post" action="{{ path('gestionnaire_facture_generer', {id: commande.id}) }}" onsubmit="return confirm('Générer la facture ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('facture' ~ commande.id) }}">
+                            <button type="submit" class="btn btn-primary w-100">
+                                🧾 Générer la facture
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {# ── Expédition — uniquement si payée ── #}
+                    {% if commande.paiementValide %}
+                        <hr>
+                        <h6 class="fw-bold">📦 Gestion de l'expédition</h6>
+
+                        {# Statut actuel #}
+                        <div class="alert
+                                    {% if commande.statutExpedition == 'livre' %}alert-success
+                                    {% elseif commande.statutExpedition == 'expedie' %}alert-primary
+                                    {% elseif commande.statutExpedition == 'en_preparation' %}alert-warning
+                                    {% else %}alert-secondary{% endif %} mb-2">
+                            {% if commande.statutExpedition == 'en_preparation' %}
+                                📦 En préparation (picking)
+                            {% elseif commande.statutExpedition == 'expedie' %}
+                                🚚 Expédiée
+                            {% elseif commande.statutExpedition == 'livre' %}
+                                ✅ Livrée
+                            {% else %}
+                                ⏳ En attente d'expédition
+                            {% endif %}
+                        </div>
+
+                        {# Formulaire de changement de statut #}
+                        <form method="post" action="{{ path('gestionnaire_commande_expedition', {id: commande.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('expedition' ~ commande.id) }}">
+
+                            <div class="d-grid gap-2">
+                                {% if commande.statutExpedition != 'en_preparation'
+                                    and commande.statutExpedition != 'expedie'
+                                    and commande.statutExpedition != 'livre' %}
+                                    <button type="submit" name="statut_expedition" value="en_preparation" class="btn btn-warning">
+                                        📦 Mettre en préparation (picking)
+                                    </button>
+                                {% endif %}
+
+                                {% if commande.statutExpedition == 'en_preparation' %}
+                                    <button type="submit" name="statut_expedition" value="expedie" class="btn btn-primary" onsubmit="return confirm('Confirmer l\'expédition ?')">
+                                        🚚 Marquer comme expédiée
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        {# Détail produits #}
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Produits commandés</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Référence</th>
+                                <th>Prix unitaire HT</th>
+                                <th>TVA</th>
+                                <th>Quantité</th>
+                                <th>Total TTC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {# Cas 1 : Si c'est un panier en attente (on utilise la liste de produits hydratés) #}
+                            {% if produits_panier is defined and produits_panier is not empty %}
+                                {% for item in produits_panier %}
+                                    <tr>
+                                        <td>{{ item.produit.nom }}</td>
+                                        <td>{{ item.produit.referenceProduit }}</td>
+                                        <td>{{ item.produit.prixHt|number_format(2, ',', ' ') }} €</td>
+                                        <td>{{ item.produit.tvaProduit|round }} %</td>
+                                        <td>{{ item.quantite }}</td>
+                                        <td>{{ (item.produit.prixTtc * item.quantite)|number_format(2, ',', ' ') }} €</td>
+                                    </tr>
+                                {% endfor %}
+
+                            {# Cas 2 : Comportement classique pour les commandes passées / payées #}
+                            {% else %}
+                                {% for ligne in commande.detailCommandes %}
+                                    <tr>
+                                        <td>{{ ligne.produit.nom }}</td>
+                                        <td>{{ ligne.produit.referenceProduit }}</td>
+                                        <td>{{ ligne.coutUnitaireHt|number_format(2, ',', ' ') }} €</td>
+                                        <td>{{ ligne.tvaProduit|round }} %</td>
+                                        <td>{{ ligne.quantite }}</td>
+                                        <td>{{ ligne.coutTotalTtc|number_format(2, ',', ' ') }} €</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">Aucun produit trouvé pour cette commande.</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-dark">
+                                <td colspan="5" class="text-end fw-bold">Total TTC :</td>
+                                <td class="fw-bold text-warning">{{ commande.coutTotalTtc }} €</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <a href="{{ path('gestionnaire_commande_index') }}" class="btn btn-secondary mt-3">
+        ← Retour aux commandes
+    </a>
+{% endblock %}

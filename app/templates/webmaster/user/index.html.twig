@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+{% block title %}Communication client — GameStore{% endblock %}
+{% block body %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>📣 Gérer les clients</h1>
+    <span class="badge bg-primary fs-6">{{ users|length }} utilisateurs</span>
+</div>
+
+{# ── Onglets Clients / Assistance ── #}
+<ul class="nav nav-tabs mb-4" id="communicationTab">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#clients">
+            👥 Clients
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#assistance">
+            🆘 Demandes d'assistance
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    {# ── Onglet Clients ── #}
+    <div class="tab-pane fade show active" id="clients">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.nom }}</td>
+                    <td>{{ user.prenom }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% for role in user.roles %}
+                            {% if role == 'ROLE_ADMIN' %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% elseif role == 'ROLE_ADMIN_PRODUIT' %}
+                                <span class="badge bg-warning text-dark">Admin Produit</span>
+                            {% elseif role == 'ROLE_GESTIONNAIRE_COMMANDE' %}
+                                <span class="badge bg-info">Gestionnaire</span>
+                            {% elseif role == 'ROLE_WEBMASTER' %}
+                                <span class="badge bg-info">Webmaster</span>
+                            {% elseif role == 'ROLE_CLIENT' %}
+                                <span class="badge bg-primary">Client</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% if user != app.user %}
+                            {% if 'ROLE_CLIENT' in user.roles
+                                and 'ROLE_WEBMASTER' not in user.roles
+                                and 'ROLE_GESTIONNAIRE_COMMANDE' not in user.roles
+                                and 'ROLE_ADMIN_PRODUIT' not in user.roles
+                                and 'ROLE_ADMIN' not in user.roles %}
+
+                                <a href="{{ path('webmaster_user_edit', {id: user.id}) }}"
+                                   class="btn btn-warning btn-sm">
+                                    ✏️ Modifier
+                                </a>
+                                <form method="post"
+                                      action="{{ path('webmaster_user_delete', {id: user.id}) }}"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Supprimer cet utilisateur ?')">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button class="btn btn-danger btn-sm">
+                                        🗑️ Supprimer
+                                    </button>
+                                </form>
+
+                            {% else %}
+                                <span class="text-muted small">🔒 Accès restreint</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted small">Votre compte</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ── Onglet Assistance ── #}
+    <div class="tab-pane fade" id="assistance">
+        <div class="row g-3 mb-4">
+
+            {# Ouvertes — cliquable #}
+            <div class="col-md-4">
+                <a href="{{ path('webmaster_assistance_index', {statut: 'ouvert'}) }}"
+                   class="text-decoration-none">
+                    <div class="card text-white bg-danger shadow h-100"
+                         style="cursor:pointer">
+                        <div class="card-body text-center py-4">
+                            <h2>{{ nb_ouvertes }}</h2>
+                            <p class="mb-0 fs-5">🔴 Ouvertes</p>
+                            <small class="opacity-75">Cliquez pour gérer</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            {# En cours — cliquable #}
+            <div class="col-md-4">
+                <a href="{{ path('webmaster_assistance_index', {statut: 'en_cours'}) }}"
+                   class="text-decoration-none">
+                    <div class="card text-white bg-warning shadow h-100"
+                         style="cursor:pointer">
+                        <div class="card-body text-center py-4">
+                            <h2>{{ nb_en_cours }}</h2>
+                            <p class="mb-0 fs-5">🟡 En cours</p>
+                            <small class="opacity-75">Cliquez pour gérer</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            {# Résolues — cliquable #}
+            <div class="col-md-4">
+                <a href="{{ path('webmaster_assistance_index', {statut: 'resolu'}) }}"
+                   class="text-decoration-none">
+                    <div class="card text-white bg-success shadow h-100"
+                         style="cursor:pointer">
+                        <div class="card-body text-center py-4">
+                            <h2>{{ nb_resolues }}</h2>
+                            <p class="mb-0 fs-5">🟢 Résolues</p>
+                            <small class="opacity-75">Cliquez pour gérer</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+<a href="{{ path('webmaster_index') }}" class="btn btn-secondary mt-3">
+    ← Retour
+</a>
+{% endblock %}

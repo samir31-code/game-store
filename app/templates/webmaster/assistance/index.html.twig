@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+{% block title %}Demandes d'assistance{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">🆘 Demandes d'assistance</h1>
+
+{# ── Statistiques cliquables ── #}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a href="{{ path('webmaster_assistance_index', {statut: 'ouvert'}) }}"
+           class="text-decoration-none">
+            <div class="card text-white shadow
+                        {{ statut_actif == 'ouvert' ? 'bg-danger border border-5 border-dark' : 'bg-danger' }}">
+                <div class="card-body text-center">
+                    <h3>{{ demandes_ouvertes|length }}</h3>
+                    <p class="mb-0">🔴 Ouvertes</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ path('webmaster_assistance_index', {statut: 'en_cours'}) }}"
+           class="text-decoration-none">
+            <div class="card text-white shadow
+                        {{ statut_actif == 'en_cours' ? 'bg-warning border border-5 border-dark' : 'bg-warning' }}">
+                <div class="card-body text-center">
+                    <h3>{{ demandes_en_cours|length }}</h3>
+                    <p class="mb-0">🟡 En cours</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ path('webmaster_assistance_index', {statut: 'resolu'}) }}"
+           class="text-decoration-none">
+            <div class="card text-white shadow
+                        {{ statut_actif == 'resolu' ? 'bg-success border border-5 border-dark' : 'bg-success' }}">
+                <div class="card-body text-center">
+                    <h3>{{ demandes_resolues|length }}</h3>
+                    <p class="mb-0">🟢 Résolues</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+{# ── Demandes ouvertes ── #}
+{% if statut_actif == 'ouvert' or statut_actif is null %}
+{% if demandes_ouvertes is not empty %}
+<div id="ouvert">
+    <h2 class="text-danger mb-3">🔴 Demandes ouvertes</h2>
+    <table class="table table-hover mb-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Client</th>
+                <th>Sujet</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demande in demandes_ouvertes %}
+            <tr class="table-danger">
+                <td>
+                    {{ demande.client.prenom }} {{ demande.client.nom }}
+                    <br>
+                    <small class="text-muted">{{ demande.client.email }}</small>
+                </td>
+                <td>{{ demande.sujet }}</td>
+                <td>{{ demande.dateCreation|date('d/m/Y H:i') }}</td>
+                <td>
+                    <a href="{{ path('webmaster_assistance_show', {id: demande.id}) }}"
+                       class="btn btn-primary btn-sm">
+                        👁️ Voir & Répondre
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endif %}
+
+{# ── Demandes en cours ── #}
+{% if statut_actif == 'en_cours' or statut_actif is null %}
+{% if demandes_en_cours is not empty %}
+<div id="en_cours">
+    <h2 class="text-warning mb-3">🟡 Demandes en cours</h2>
+    <table class="table table-hover mb-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Client</th>
+                <th>Sujet</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demande in demandes_en_cours %}
+            <tr class="table-warning">
+                <td>
+                    {{ demande.client.prenom }} {{ demande.client.nom }}
+                    <br>
+                    <small class="text-muted">{{ demande.client.email }}</small>
+                </td>
+                <td>{{ demande.sujet }}</td>
+                <td>{{ demande.dateCreation|date('d/m/Y H:i') }}</td>
+                <td>
+                    <a href="{{ path('webmaster_assistance_show', {id: demande.id}) }}"
+                       class="btn btn-warning btn-sm">
+                        👁️ Voir & Répondre
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endif %}
+
+{# ── Demandes résolues ── #}
+{% if statut_actif == 'resolu' or statut_actif is null %}
+{% if demandes_resolues is not empty %}
+<div id="resolu">
+    <h2 class="text-success mb-3">🟢 Demandes résolues</h2>
+    <table class="table table-hover mb-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Client</th>
+                <th>Sujet</th>
+                <th>Date résolution</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demande in demandes_resolues %}
+            <tr class="table-success">
+                <td>
+                    {{ demande.client.prenom }} {{ demande.client.nom }}
+                </td>
+                <td>{{ demande.sujet }}</td>
+                <td>
+                    {{ demande.dateReponse
+                        ? demande.dateReponse|date('d/m/Y H:i')
+                        : '-' }}
+                </td>
+                <td>
+                    <a href="{{ path('webmaster_assistance_show', {id: demande.id}) }}"
+                       class="btn btn-success btn-sm">
+                        👁️ Voir
+                    </a>
+                    <form method="post"
+                          action="{{ path('webmaster_assistance_delete', {id: demande.id}) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('Supprimer définitivement ?')">
+                        <input type="hidden" name="_token"
+                               value="{{ csrf_token('delete' ~ demande.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            🗑️ Supprimer
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endif %}
+
+{# Message si aucune demande pour ce statut #}
+{% if statut_actif == 'ouvert' and demandes_ouvertes is empty %}
+    <div class="alert alert-success">✅ Aucune demande ouverte !</div>
+{% elseif statut_actif == 'en_cours' and demandes_en_cours is empty %}
+    <div class="alert alert-success">✅ Aucune demande en cours !</div>
+{% elseif statut_actif == 'resolu' and demandes_resolues is empty %}
+    <div class="alert alert-info">ℹ️ Aucune demande résolue.</div>
+{% endif %}
+
+<a href="{{ path('webmaster_user_index') }}" class="btn btn-secondary">
+    ← Retour
+</a>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue — GameStore{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">🎮 Catalogue</h1>
+
+{# ── Barre de recherche ── #}
+<form method="get" action="{{ path('produit_index') }}" class="mb-4">
+    <div class="input-group">
+        <input type="text"
+               name="q"
+               class="form-control form-control-lg"
+               placeholder="🔍 Rechercher un produit, une marque, une catégorie..."
+               value="{{ recherche ?? '' }}">
+        <button type="submit" class="btn btn-primary">
+            🔍 Rechercher
+        </button>
+        {% if recherche %}
+            <a href="{{ path('produit_index') }}" class="btn btn-outline-secondary">
+                ✖ Effacer
+            </a>
+        {% endif %}
+    </div>
+</form>
+
+{# ── Message résultats ── #}
+{% if recherche %}
+    <div class="alert alert-info mb-4">
+        {% if produits|length > 0 %}
+            🔍 <strong>{{ produits|length }}</strong> résultat(s) pour
+            "<strong>{{ recherche }}</strong>"
+        {% else %}
+            ❌ Aucun résultat pour "<strong>{{ recherche }}</strong>"
+        {% endif %}
+        — <a href="{{ path('produit_index') }}">Voir tous les produits</a>
+    </div>
+{% endif %}
+
+{# ── Filtres par catégorie ── #}
+{% if not recherche %}
+<div class="mb-4">
+    <a href="{{ path('produit_index') }}"
+       class="btn btn-sm {{ not categorieSelectionnee ? 'btn-dark' : 'btn-outline-dark' }} me-2">
+        Tout
+    </a>
+    {% for categorie in categories %}
+        <a href="{{ path('produit_index', {categorie: categorie.id}) }}"
+           class="btn btn-sm {{ categorieSelectionnee == categorie.id ? 'btn-dark' : 'btn-outline-dark' }} me-2">
+            {{ categorie.nom }}
+        </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Grille de produits ── #}
+<div class="row g-4">
+    {% for produit in produits %}
+    <div class="col-md-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <span class="badge bg-secondary mb-2">
+                    {{ produit.categorie ? produit.categorie.nom : '-' }}
+                </span>
+                <h5 class="card-title">{{ produit.nom }}</h5>
+                <p class="text-muted small">{{ produit.marque }}</p>
+
+                {# Étiquettes #}
+                {% for etiquette in produit.etiquettes %}
+                    <span class="badge bg-info me-1">{{ etiquette.nom }}</span>
+                {% endfor %}
+
+                <p class="fw-bold text-primary fs-5 mt-2">{{ produit.prixTtc }} €</p>
+                <p class="text-muted small">
+                    HT : {{ produit.prixHt }} € (TVA {{ produit.tvaProduit }}%)
+                </p>
+
+                {% if produit.etatStock == 'disponible' %}
+                    <span class="badge bg-success">
+                        En stock ({{ produit.quantiteStock }})
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger">Rupture de stock</span>
+                {% endif %}
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <a href="{{ path('produit_show', {id: produit.id}) }}"
+                   class="btn btn-outline-primary btn-sm">
+                    Voir
+                </a>
+
+                {# ✅ MODIFICATION : Autorise l'ajout si non connecté (anonyme) OU si ROLE_CLIENT #}
+                {% if (not app.user or is_granted('ROLE_CLIENT')) and produit.etatStock == 'disponible' %}
+                    <a href="{{ path('panier_ajouter', {id: produit.id}) }}"
+                       class="btn btn-primary btn-sm">
+                        🛒 Ajouter
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                {% if recherche %}
+                    ❌ Aucun produit trouvé pour "{{ recherche }}".
+                    <a href="{{ path('produit_index') }}">Voir tous les produits</a>
+                {% else %}
+                    Aucun produit disponible pour le moment.
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

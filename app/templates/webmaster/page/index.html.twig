@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pages du site — GameStore{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>📄 Pages du site</h1>
+    <a href="{{ path('webmaster_page_new') }}" class="btn btn-success">
+        ➕ Nouvelle page
+    </a>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Titre</th>
+            <th>URL</th>
+            <th>Statut</th>
+            <th>Dernière modification</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for page in pages %}
+        <tr>
+            <td>{{ page.titre }}</td>
+            <td><code>/page/{{ page.slug }}</code></td>
+            <td>
+                {% if page.estPubliee %}
+                    <span class="badge bg-success">Publiée</span>
+                {% else %}
+                    <span class="badge bg-secondary">Brouillon</span>
+                {% endif %}
+            </td>
+            <td>
+                {{ page.dateModification
+                    ? page.dateModification|date('d/m/Y H:i')
+                    : page.dateCreation|date('d/m/Y H:i') }}
+            </td>
+            <td>
+                <a href="{{ path('page_show', {slug: page.slug}) }}"
+                   class="btn btn-info btn-sm" target="_blank">
+                    👁️ Voir
+                </a>
+                <a href="{{ path('webmaster_page_edit', {id: page.id}) }}"
+                   class="btn btn-warning btn-sm">
+                    ✏️ Modifier
+                </a>
+                <form method="post"
+                      action="{{ path('webmaster_page_delete', {id: page.id}) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Supprimer cette page ?')">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('delete' ~ page.id) }}">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        🗑️ Supprimer
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    Aucune page pour le moment.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('webmaster_index') }}" class="btn btn-secondary">
+    ← Retour
+</a>
+{% endblock %}

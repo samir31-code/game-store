@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+{% block title %}Étiquettes — Gestionnaire{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>🏷️ Étiquettes</h1>
+    <a href="{{ path('gestionnaire_etiquette_new') }}" class="btn btn-success">
+        ➕ Nouvelle étiquette
+    </a>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for etiquette in etiquettes %}
+        <tr>
+            <td><span class="badge bg-info fs-6">{{ etiquette.nom }}</span></td>
+            <td>{{ etiquette.description }}</td>
+            <td>
+                <a href="{{ path('gestionnaire_etiquette_edit', {id: etiquette.id}) }}"
+                   class="btn btn-warning btn-sm">✏️ Modifier</a>
+                <form method="post"
+                      action="{{ path('gestionnaire_etiquette_delete', {id: etiquette.id}) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Supprimer cette étiquette ?')">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('delete' ~ etiquette.id) }}">
+                    <button class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">
+                    Aucune étiquette pour le moment.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('gestionnaire_index') }}" class="btn btn-secondary">← Retour</a>
+{% endblock %}

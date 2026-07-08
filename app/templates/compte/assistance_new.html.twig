@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+{% block title %}Demande d'assistance{% endblock %}
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="mb-4">🆘 Nouvelle demande d'assistance</h1>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {{ form_start(form) }}
+                <div class="mb-3">
+                    {{ form_label(form.sujet) }}
+                    {{ form_widget(form.sujet) }}
+                    {{ form_errors(form.sujet) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description) }}
+                    {{ form_errors(form.description) }}
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        📨 Envoyer la demande
+                    </button>
+                    <a href="{{ path('compte_index') }}"
+                       class="btn btn-secondary">
+                        Annuler
+                    </a>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

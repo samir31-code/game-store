@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes adresses — GameStore{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>📍 Mes adresses</h1>
+    <a href="{{ path('compte_adresse_new') }}" class="btn btn-success">
+        ➕ Nouvelle adresse
+    </a>
+</div>
+
+{% if adresses is empty %}
+    <div class="alert alert-info">
+        Vous n'avez pas encore d'adresse.
+        <a href="{{ path('compte_adresse_new') }}">Ajouter une adresse</a>
+    </div>
+{% else %}
+    <div class="row g-4">
+        {% for adresse in adresses %}
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100 border-{{ adresse.type == 'livraison' ? 'primary' : 'success' }}">
+                <div class="card-header bg-{{ adresse.type == 'livraison' ? 'primary' : 'success' }} text-white">
+                    <h5 class="mb-0">
+                        {{ adresse.type == 'livraison' ? '🚚 Livraison' : '🧾 Facturation' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">
+                        {% if adresse.numero %}{{ adresse.numero }}{% endif %}
+                        {{ adresse.voie }}
+                    </p>
+                    {% if adresse.complementAdresse1 %}
+                        <p class="mb-1">{{ adresse.complementAdresse1 }}</p>
+                    {% endif %}
+                    {% if adresse.complementAdresse2 %}
+                        <p class="mb-1">{{ adresse.complementAdresse2 }}</p>
+                    {% endif %}
+                    <p class="mb-1">
+                        {{ adresse.codePostal }} — {{ adresse.ville }}
+                    </p>
+                    <p class="mb-1 text-muted small">FR France</p>
+                    {% if adresse.detailLivraison %}
+                        <p class="text-muted small mt-2">
+                            📝 {{ adresse.detailLivraison }}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex gap-2">
+                    <a href="{{ path('compte_adresse_edit', {id: adresse.id}) }}"
+                       class="btn btn-warning btn-sm">
+                        ✏️ Modifier
+                    </a>
+                    <form method="post"
+                          action="{{ path('compte_adresse_delete', {id: adresse.id}) }}"
+                          onsubmit="return confirm('Supprimer cette adresse ?')">
+                        <input type="hidden" name="_token"
+                               value="{{ csrf_token('delete' ~ adresse.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            🗑️ Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<a href="{{ path('compte_index') }}" class="btn btn-secondary mt-4">
+    ← Retour à mon compte
+</a>
+{% endblock %}

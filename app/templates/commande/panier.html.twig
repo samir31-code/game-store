@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon panier — GameStore
+{% endblock %}
+
+{% block body %}
+	<h1 class="mb-4">🛒 Mon panier</h1>
+
+	{% if panier is empty %}
+		<div class="alert alert-info">
+			Votre panier est vide.
+			<a href="{{ path('produit_index') }}">Voir le catalogue</a>
+		</div>
+	{% else %}
+		<table class="table table-striped">
+			<thead class="table-dark">
+				<tr>
+					<th>Produit</th>
+					<th>Prix HT</th>
+					<th>Prix TTC</th>
+					<th>Quantité</th>
+					<th>Sous-total TTC</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in panier %}
+					<tr>
+						<td>{{ item.produit.nom }}</td>
+						<td>{{ item.produit.prixHt }}
+							€</td>
+						<td>{{ item.produit.prixTtc }}
+							€</td>
+						<td>{{ item.quantite }}</td>
+						<td class="fw-bold">{{ item.sous_total_ttc|number_format(2, ',', ' ') }}
+							€</td>
+						<td>
+							<a href="{{ path('panier_supprimer', {id: item.produit.id}) }}" class="btn btn-danger btn-sm">
+								🗑️ Retirer
+							</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+			<tfoot>
+				<tr class="table-secondary">
+					<td colspan="4" class="text-end fw-bold">Total HT :</td>
+					<td colspan="2" class="fw-bold">{{ total_ht|number_format(2, ',', ' ') }}
+						€</td>
+				</tr>
+				<tr class="table-dark">
+					<td colspan="4" class="text-end fw-bold">Total TTC :</td>
+					<td colspan="2" class="fw-bold text-warning fs-5">
+						{{ total_ttc|number_format(2, ',', ' ') }}
+						€
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+
+		{# Formulaire de paiement Stripe #}
+		<form method="post" action="{{ path('stripe_checkout') }}">
+			<div class="row justify-content-end">
+				<div
+					class="col-md-4">
+
+					{# Résumé des totaux #}
+					<div class="card mb-3 border-primary">
+						<div class="card-body">
+							<div class="d-flex justify-content-between">
+								<span>Total HT :</span>
+								<strong>{{ total_ht|number_format(2, ',', ' ') }}
+									€</strong>
+							</div>
+							<div class="d-flex justify-content-between fs-5 text-primary">
+								<span>Total TTC :</span>
+								<strong>{{ total_ttc|number_format(2, ',', ' ') }}
+									€</strong>
+							</div>
+						</div>
+					</div>
+
+					{# Remplace l'ancien bouton ou formulaire de soumission directe par un simple lien stylisé en bouton #}
+					<a href="{{ path('commande_checkout') }}" class="btn btn-success w-100 py-2">
+						💳 Procéder au paiement
+					</a>
+
+					{# Continuer les achats #}
+					<a href="{{ path('produit_index') }}" class="btn btn-outline-secondary w-100">
+						← Continuer mes achats
+					</a>
+
+					<p class="text-muted text-center mt-2 small">
+						🔒 Paiement sécurisé par Stripe
+					</p>
+
+				</div>
+			</div>
+		</form>
+	{% endif %}
+{% endblock %}

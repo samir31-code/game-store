@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page.titre }} — GameStore{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="mb-4">{{ page.titre }}</h1>
+        <hr>
+        <div class="page-contenu">
+            {{ page.contenu|nl2br }}
+        </div>
+        <hr>
+        <small class="text-muted">
+            Dernière mise à jour :
+            {{ page.dateModification
+                ? page.dateModification|date('d/m/Y')
+                : page.dateCreation|date('d/m/Y') }}
+        </small>
+    </div>
+</div>
+{% endblock %}

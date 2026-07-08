@@ -1,0 +1,71 @@
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: app_home
+                username_parameter: email
+                password_parameter: password
+            logout:
+                path: app_logout
+                target: app_home
+
+
+    # ── Hiérarchie des rôles ─────────────────────────────────
+    role_hierarchy:
+        ROLE_CLIENT:                [ROLE_USER]
+        ROLE_WEBMASTER:             [ROLE_CLIENT]
+        ROLE_GESTIONNAIRE_COMMANDE: [ROLE_CLIENT]
+        ROLE_ADMIN_PRODUIT:         [ROLE_WEBMASTER, ROLE_GESTIONNAIRE_COMMANDE]
+        ROLE_ADMIN:                 [ROLE_ADMIN_PRODUIT]
+
+
+    # ── Contrôle d'accès par URL ─────────────────────────────
+    access_control:
+        # Visiteur — contenu public sans compte
+        - { path: ^/login,         roles: PUBLIC_ACCESS }
+        - { path: ^/register,      roles: PUBLIC_ACCESS }
+        - { path: ^/produits,      roles: PUBLIC_ACCESS }
+        - { path: ^/page,          roles: PUBLIC_ACCESS }
+        - { path: ^/$,             roles: PUBLIC_ACCESS }
+
+
+        # Client — compte + adresses + commandes
+        - { path: ^/compte,        roles: ROLE_CLIENT }
+        - { path: ^/commande,      roles: ROLE_CLIENT }
+        - { path: ^/adresse,       roles: ROLE_CLIENT }
+
+
+        # Webmaster — contenu + modification produit
+        - { path: ^/webmaster,     roles: ROLE_WEBMASTER }
+
+
+        # Gestionnaire — commandes + stock + livraison
+        - { path: ^/gestionnaire,  roles: ROLE_GESTIONNAIRE_COMMANDE }
+
+
+        # Admin produit — CRUD complet produits
+        - { path: ^/admin/produit, roles: ROLE_ADMIN_PRODUIT }
+
+
+        # Admin — accès total
+        - { path: ^/admin,         roles: ROLE_ADMIN }
+

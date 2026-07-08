@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ facture.numeroFacture }}</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; color: #333; font-size: 13px; line-height: 1.5; }
+        .facture-box { max-width: 800px; margin: auto; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        table td { padding: 8px; vertical-align: top; }
+        .heading td { background: #212529; color: #fff; font-weight: bold; }
+        .item td { border-bottom: 1px solid #eee; }
+        .total td { font-weight: bold; border-top: 2px solid #212529; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+<div class="facture-box">
+    <table>
+        <tr>
+            <td style="font-size: 24px; font-weight: bold; color: #0d6efd;">
+            {% if logo %}
+                <img src="{{ logo }}" alt="GameStore Logo" style="height: 50px; width: auto;">
+            {% else %}
+                <span style="font-size: 24px; font-weight: bold; color: #007bff;">GameStore</span>
+            {% endif %}
+            </td>
+            <td class="text-right">
+                <strong>Facture N° :</strong> {{ facture.numeroFacture }}<br>
+                <strong>Commande liée :</strong> {{ commande.numeroCommande }}<br>
+                <strong>Date de facturation :</strong> {{ facture.dateFacturation|date('d/m/Y') }}<br>
+            </td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 20px;">
+        <tr>
+            <td>
+                <strong>Boutique :</strong><br>
+                GameStore Toulouse<br>
+                Place du Capitole<br>
+                31000 Toulouse
+            </td>
+            <td class="text-right">
+                <strong>Client :</strong><br>
+                {{ commande.user.prenom }} {{ commande.user.nom|upper }}<br>
+                {% if commande.user.adresses is not empty %}
+                    {% set addr = commande.user.adresses|first %}
+                    {{ addr.numero }} {{ addr.voie }}<br>
+                    {% if addr.complementAdresse1 %}{{ addr.complementAdresse1 }}<br>{% endif %}
+                    {{ addr.codePostal }} {{ addr.ville|upper }}
+                {% else %}
+                    <span style="color: red;">Aucune adresse enregistrée</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 30px;">
+        <tr class="heading">
+            <td>Article</td>
+            <td class="text-center">Prix U. HT</td>
+            <td class="text-center">Quantité</td>
+            <td class="text-right">Total TTC</td>
+        </tr>
+
+        {% for detail in commande.detailCommandes %}
+        <tr class="item">
+            <td>{{ detail.produit.nom }}</td>
+            <td class="text-center">{{ detail.coutUnitaireHt }} €</td>
+            <td class="text-center">{{ detail.quantite }}</td>
+            <td class="text-right">{{ detail.coutTotalTtc }} €</td>
+        </tr>
+        {% endfor %}
+
+        <tr class="total">
+            <td></td>
+            <td></td>
+            <td class="text-right">Total HT :</td>
+            <td class="text-right">{{ commande.coutTotalHt }} €</td>
+        </tr>
+        <tr class="total" style="color: #0d6efd; font-size: 15px;">
+            <td></td>
+            <td></td>
+            <td class="text-right">Total TTC :</td>
+            <td class="text-right">{{ commande.coutTotalTtc }} €</td>
+        </tr>
+    </table>
+
+    <p style="text-align: center; font-size: 11px; color: #6c757d; margin-top: 60px;">
+        Merci pour votre achat sur GameStore !<br>
+        Mode de règlement appliqué : <strong>{{ commande.typePaiement|upper }}</strong>
+    </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ produit.nom }} — GameStore{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="mb-4">✏️ Modifier — {{ produit.nom }}</h1>
+
+        {{ form_start(form) }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.referenceProduit) }}
+                {{ form_widget(form.referenceProduit) }}
+                {{ form_errors(form.referenceProduit) }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom) }}
+                {{ form_errors(form.nom) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.marque) }}
+            {{ form_widget(form.marque) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form_label(form.prixHt) }}
+                {{ form_widget(form.prixHt) }}
+                {{ form_errors(form.prixHt) }}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form_label(form.tvaProduit) }}
+                {{ form_widget(form.tvaProduit) }}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form_label(form.quantiteStock) }}
+                {{ form_widget(form.quantiteStock) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.etatStock) }}
+            {{ form_widget(form.etatStock) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.categorie) }}
+            {{ form_widget(form.categorie) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.etiquettes) }}
+            {{ form_widget(form.etiquettes) }}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-warning">
+                💾 Modifier
+            </button>
+            <a href="{{ path('admin_produit_index') }}"
+               class="btn btn-secondary">
+                Annuler
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

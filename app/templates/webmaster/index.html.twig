@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+{% block title %}Webmaster — GameStore{% endblock %}
+{% block body %}
+<h1 class="mb-4">🌐 Espace Webmaster</h1>
+<p class="text-muted mb-4">
+    Bienvenue ! Vous pouvez modifier les produits,
+    créer du contenu et gérer la communication client.
+</p>
+
+<div class="row g-4">
+
+    {# Modification produits #}
+    <div class="col-md-4">
+        <div class="card text-white bg-warning shadow h-100">
+            <div class="card-body text-center">
+                <h4>🎮 Produits</h4>
+                <p class="mb-0">Modifier les produits</p>
+                <small>(pas de création ni suppression)</small>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ path('webmaster_produit_index') }}"
+                   class="btn btn-dark btn-sm">
+                    ✏️ Modifier les produits
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Pages / Contenu mercantile #}
+    <div class="col-md-4">
+        <div class="card text-white bg-success shadow h-100">
+            <div class="card-body text-center">
+                <h4>📄 Contenu & Pages</h4>
+                <p class="mb-0">{{ nb_pages }} pages</p>
+                <small>Contenu mercantile du site</small>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ path('webmaster_page_index') }}"
+                   class="btn btn-light btn-sm">Gérer</a>
+            </div>
+        </div>
+    </div>
+
+    {# Utilisateurs / Communication client #}
+    <div class="col-md-4">
+        <div class="card text-white bg-danger shadow h-100">
+            <div class="card-body text-center">
+                <h4>📣 Communication client</h4>
+                <p class="mb-0">{{ nb_users }} utilisateurs</p>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ path('webmaster_user_index') }}"
+                   class="btn btn-light btn-sm">
+                    👥 Clients & Assistance
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

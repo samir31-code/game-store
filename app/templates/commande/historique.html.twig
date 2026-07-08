@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes commandes — GameStore{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">📋 Mes commandes</h1>
+
+{% if commandes is empty %}
+    <div class="alert alert-info">
+        Vous n'avez pas encore de commande.
+        <a href="{{ path('produit_index') }}">Voir le catalogue</a>
+    </div>
+{% else %}
+    {% for commande in commandes %}
+    <div class="card shadow-sm mb-4">
+
+        {# ── En-tête de la commande ── #}
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ commande.numeroCommande }}</strong>
+                <span class="text-muted ms-3">
+                    {{ commande.dateCommande|date('d/m/Y à H:i') }}
+                </span>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                {# Mode de paiement #}
+                {% if commande.typePaiement == 'carte' %}
+                    <span class="badge bg-secondary">💳 Carte</span>
+                {% elseif commande.typePaiement == 'virement' %}
+                    <span class="badge bg-secondary">🏦 Virement</span>
+                {% elseif commande.typePaiement == 'paypal' %}
+                    <span class="badge bg-secondary">🅿️ PayPal</span>
+                {% endif %}
+
+                {# Statut paiement #}
+                {# Statut paiement & suivi d'expédition #}
+                {% if commande.paiementValide %}
+                    <span class="badge bg-success">✅ Payé</span>
+
+                    {# Le statut d'expédition s'affiche ici pour tout le monde dès que c'est payé #}
+                    {% if commande.statutExpedition == 'en_preparation' %}
+                        <span class="badge bg-warning text-dark">📦 En préparation</span>
+                    {% elseif commande.statutExpedition == 'expedie' %}
+                        <span class="badge bg-primary">🚚 Expédiée</span>
+                    {% elseif commande.statutExpedition == 'livre' %}
+                        <span class="badge bg-success">✅ Livrée</span>
+                    {% else %}
+                        <span class="badge bg-secondary">⏳ À expédier</span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge bg-warning text-dark">⏳ En attente</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ── Détail des produits ── #}
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Produit</th>
+                        <th class="text-center">Quantité</th>
+                        <th class="text-end">Prix unit. HT</th>
+                        <th class="text-end">TVA</th>
+                        <th class="text-end">Prix unit. TTC</th>
+                        <th class="text-end">Total HT</th>
+                        <th class="text-end">Total TTC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in commande.detailCommandes %}
+                    <tr>
+                        <td>
+                            <strong>{{ detail.produit.nom }}</strong>
+                            <br>
+                            <small class="text-muted">
+                                Réf : {{ detail.produit.referenceProduit }}
+                            </small>
+                            {% if detail.produit.marque %}
+                                <br>
+                                <small class="text-muted">
+                                    {{ detail.produit.marque }}
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary">
+                                {{ detail.quantite }}
+                            </span>
+                        </td>
+                        <td class="text-end">{{ detail.coutUnitaireHt }} €</td>
+                        <td class="text-end">{{ detail.tvaProduit }} %</td>
+                        <td class="text-end">{{ detail.coutUnitaireTtc }} €</td>
+                        <td class="text-end">{{ detail.coutTotalHt }} €</td>
+                        <td class="text-end fw-bold text-primary">
+                            {{ detail.coutTotalTtc }} €
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="table-secondary">
+                        <td colspan="5" class="text-end fw-bold">Total HT :</td>
+                        <td colspan="2" class="text-end fw-bold">
+                            {{ commande.coutTotalHt }} €
+                        </td>
+                    </tr>
+                    <tr class="table-dark">
+                        <td colspan="5" class="text-end fw-bold text-white">
+                            Total TTC :
+                        </td>
+                        <td colspan="2" class="text-end fw-bold text-warning fs-5">
+                            {{ commande.coutTotalTtc }} €
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+    </div>
+    {% endfor %}
+{% endif %}
+
+<div class="d-flex gap-2 mt-3">
+    <a href="{{ path('compte_index') }}" class="btn btn-secondary">
+        ← Retour à mon compte
+    </a>
+    <a href="{{ path('produit_index') }}" class="btn btn-outline-primary">
+        🎮 Continuer mes achats
+    </a>
+</div>
+{% endblock %}

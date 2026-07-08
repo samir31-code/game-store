@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+{% block title %}Envoyer un message{% endblock %}
+{% block body %}
+<h1 class="mb-4">
+    ✉️ Envoyer un message à
+    {{ destinataire.prenom }} {{ destinataire.nom }}
+</h1>
+
+<div class="alert alert-info">
+    <strong>Destinataire :</strong>
+    {{ destinataire.prenom }} {{ destinataire.nom }}
+    — {{ destinataire.email }}
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {{ form_start(form) }}
+
+        <div class="mb-3">
+            {{ form_label(form.sujet) }}
+            {{ form_widget(form.sujet) }}
+            {{ form_errors(form.sujet) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.contenu) }}
+            {{ form_widget(form.contenu) }}
+            {{ form_errors(form.contenu) }}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                📨 Envoyer le message
+            </button>
+            <a href="{{ path('webmaster_user_index') }}"
+               class="btn btn-secondary">
+                Annuler
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

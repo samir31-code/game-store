@@ -1,0 +1,466 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme registrationForm 'bootstrap_5_layout.html.twig' %}
+
+{% block title %}Création de compte — GameStore{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Checklist mot de passe */
+    .check-item { transition: color .2s; }
+    .check-item.text-success .icon::before { content: "✅"; }
+    .check-item.text-muted .icon::before { content: "⬜"; }
+
+    /* Astérisque obligatoire */
+    .required-star { color: #dc3545; font-weight: bold; margin-left: 2px; }
+
+    /* Champ invalide — bordure rouge */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, .15);
+    }
+
+    /* Champ valide — bordure verte discrète */
+    .form-control.is-valid,
+    .form-select.is-valid {
+        border-color: #198754;
+    }
+
+    .invalid-feedback-custom {
+        display: none;
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+    .invalid-feedback-custom.show {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+
+        <h1 class="mb-4">Identification / Création de compte</h1>
+
+        {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate', 'id': 'registerForm'}}) }}
+
+        {# ══ Bloc 1 — Vous êtes / Email / Mot de passe ══ #}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <label class="form-label fw-bold">Vous êtes :</label>
+                <div class="d-flex gap-4 mb-3">
+                    {{ form_widget(registrationForm.typeCompte) }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Votre adresse email<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.email, {
+                        'attr': {
+                            'class': 'form-control champ-requis',
+                            'data-error': 'Veuillez saisir une adresse email valide.'
+                        }
+                    }) }}
+                    <div class="invalid-feedback-custom">
+                        Veuillez saisir une adresse email valide.
+                    </div>
+                    {{ form_errors(registrationForm.email) }}
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">
+                        Votre mot de passe<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.plainPassword.first, {
+                        'attr': {
+                            'class': 'form-control champ-requis',
+                            'id': 'pwd-first',
+                            'data-error': 'Le mot de passe ne respecte pas les critères ci-dessous.'
+                        }
+                    }) }}
+                    <div class="invalid-feedback-custom">
+                        Le mot de passe ne respecte pas les critères ci-dessous.
+                    </div>
+                </div>
+
+                {# ── Checklist mot de passe en direct ── #}
+                <ul class="list-unstyled small mb-3">
+                    <li id="check-length" class="check-item text-muted">
+                        <span class="icon"></span> 8 caractères minimum
+                    </li>
+                    <li id="check-digit" class="check-item text-muted">
+                        <span class="icon"></span> 1 chiffre
+                    </li>
+                    <li id="check-upper" class="check-item text-muted">
+                        <span class="icon"></span> 1 majuscule
+                    </li>
+                    <li id="check-special" class="check-item text-muted">
+                        <span class="icon"></span> 1 caractère spécial (ex: !@*%&)
+                    </li>
+                </ul>
+
+                <div class="mb-2">
+                    <label class="form-label">
+                        Confirmer le mot de passe<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.plainPassword.second, {
+                        'attr': {
+                            'class': 'form-control champ-requis',
+                            'id': 'pwd-second',
+                            'data-error': 'Les mots de passe ne correspondent pas.'
+                        }
+                    }) }}
+                    <div class="invalid-feedback-custom">
+                        Les mots de passe ne correspondent pas.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {# ══ Bloc 2 — Identité / Coordonnées / Adresse ══ #}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Civilité<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.civilite, {
+                        'attr': {
+                            'class': 'form-select champ-requis',
+                            'data-error': 'Veuillez sélectionner une civilité.'
+                        }
+                    }) }}
+                    <div class="invalid-feedback-custom">
+                        Veuillez sélectionner une civilité.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Nom<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.nom, {
+                        'attr': {
+                            'class': 'form-control champ-requis',
+                            'data-error': 'Le nom est obligatoire (2 caractères minimum).'
+                        }
+                    }) }}
+                    <div class="invalid-feedback-custom">
+                        Le nom est obligatoire (2 caractères minimum).
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Prénom<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.prenom, {
+                        'attr': {
+                            'class': 'form-control champ-requis',
+                            'data-error': 'Le prénom est obligatoire (2 caractères minimum).'
+                        }
+                    }) }}
+                    <div class="invalid-feedback-custom">
+                        Le prénom est obligatoire (2 caractères minimum).
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(registrationForm.dateNaissance) }}
+                    {{ form_widget(registrationForm.dateNaissance) }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Téléphone portable<span class="required-star">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">🇫🇷 +33</span>
+                        {{ form_widget(registrationForm.telephone, {
+                            'attr': {
+                                'class': 'form-control champ-requis',
+                                'data-error': 'Veuillez saisir un numéro de téléphone valide.'
+                            }
+                        }) }}
+                    </div>
+                    <div class="invalid-feedback-custom">
+                        Veuillez saisir un numéro de téléphone valide.
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-3">Votre adresse</h6>
+
+                {% for adresse in registrationForm.adresses %}
+                    {{ form_widget(adresse.type) }}
+                    {{ form_widget(adresse.codePays) }}
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            {{ form_label(adresse.numero) }}
+                            {{ form_widget(adresse.numero) }}
+                        </div>
+                        <div class="col-md-9 mb-3">
+                            <label class="form-label">
+                                Voie<span class="required-star">*</span>
+                            </label>
+                            {{ form_widget(adresse.voie, {
+                                'attr': {
+                                    'class': 'form-control champ-requis',
+                                    'data-error': 'La voie est obligatoire.'
+                                }
+                            }) }}
+                            <div class="invalid-feedback-custom">
+                                La voie est obligatoire.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(adresse.complementAdresse1) }}
+                        {{ form_widget(adresse.complementAdresse1) }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Code postal<span class="required-star">*</span>
+                            </label>
+                            {{ form_widget(adresse.codePostal, {
+                                'attr': {
+                                    'class': 'form-control champ-requis',
+                                    'data-error': 'Le code postal doit contenir 5 chiffres.',
+                                    'maxlength': '5',
+                                    'pattern': '[0-9]{5}'
+                                }
+                            }) }}
+                            <div class="invalid-feedback-custom">
+                                Le code postal doit contenir 5 chiffres.
+                            </div>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">
+                                Ville<span class="required-star">*</span>
+                            </label>
+                            {{ form_widget(adresse.ville, {
+                                'attr': {
+                                    'class': 'form-control champ-requis',
+                                    'data-error': 'La ville est obligatoire.'
+                                }
+                            }) }}
+                            <div class="invalid-feedback-custom">
+                                La ville est obligatoire.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Pays</label>
+                        <input type="text" class="form-control" value="France" disabled>
+                    </div>
+
+                    <div class="mb-2">
+                        {{ form_label(adresse.detailLivraison) }}
+                        {{ form_widget(adresse.detailLivraison) }}
+                    </div>
+                {% endfor %}
+
+                <div class="form-check mt-2">
+                    {{ form_widget(registrationForm.utiliserFacturation) }}
+                    {{ form_label(registrationForm.utiliserFacturation) }}
+                </div>
+
+            </div>
+        </div>
+
+        {# ══ Bloc 3 — Préférences de communication ══ #}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Mes préférences de communication</h6>
+                <p class="small text-muted">
+                    J'accepte de recevoir les offres GameStore
+                </p>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ registrationForm.accepteOffresEmail.vars.label }}</label>
+                        <div class="d-flex gap-4">
+                            {{ form_widget(registrationForm.accepteOffresEmail) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ registrationForm.accepteOffresSms.vars.label }}</label>
+                        <div class="d-flex gap-4">
+                            {{ form_widget(registrationForm.accepteOffresSms) }}
+                        </div>
+                    </div>
+                </div>
+
+                <label class="form-label">
+                    {{ registrationForm.accepteOffresPartenaires.vars.label }}
+                </label>
+                <div class="d-flex gap-4">
+                    {{ form_widget(registrationForm.accepteOffresPartenaires) }}
+                </div>
+            </div>
+        </div>
+
+        {# Message d'erreur global #}
+        <div class="alert alert-danger d-none" id="global-error">
+            ⚠️ Merci de corriger les champs en rouge avant de continuer.
+        </div>
+
+        <div class="form-check mb-4">
+            {{ form_widget(registrationForm.rgpdConsent) }}
+            <label class="form-check-label small" for="{{ registrationForm.rgpdConsent.vars.id }}">
+                J'accepte les <a href="#" target="_blank">Conditions Générales d'Utilisation</a> et la <a href="#" target="_blank">Politique de Confidentialité</a> de GameStore. <span class="required-star">*</span>
+            </label>
+            <div class="invalid-feedback-custom">
+                Vous devez accepter notre politique de confidentialité pour continuer.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-warning w-100 btn-lg fw-bold">
+            Créer mon compte
+        </button>
+
+        <p class="text-muted small mt-2">
+            <span class="required-star">*</span> Champs obligatoires
+        </p>
+
+        {{ form_end(registrationForm) }}
+
+        <hr>
+        <p class="text-center">
+            Déjà un compte ?
+            <a href="{{ path('app_login') }}">Se connecter</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Sélection fiable des champs mot de passe ──────────────
+    // On utilise le "name" du champ plutôt que l'id, car Symfony
+    // génère parfois des id différents de ceux qu'on demande.
+    const pwdFirst  = document.querySelector('input[name$="[plainPassword][first]"]');
+    const pwdSecond = document.querySelector('input[name$="[plainPassword][second]"]');
+
+    // ── Vérifie le mot de passe et coche la checklist ─────────
+    function checkPasswordRules(val) {
+        const rules = {
+            length:  val.length >= 8,
+            digit:   /\d/.test(val),
+            upper:   /[A-Z]/.test(val),
+            special: /[^A-Za-z0-9]/.test(val),
+        };
+        toggleCheck('check-length',  rules.length);
+        toggleCheck('check-digit',   rules.digit);
+        toggleCheck('check-upper',   rules.upper);
+        toggleCheck('check-special', rules.special);
+        return rules.length && rules.digit && rules.upper && rules.special;
+    }
+
+    function toggleCheck(id, valid) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.toggle('text-success', valid);
+        el.classList.toggle('text-muted', !valid);
+    }
+
+    function setFieldState(field, valid) {
+        field.classList.remove('is-invalid', 'is-valid');
+        field.classList.add(valid ? 'is-valid' : 'is-invalid');
+
+        const feedback = field.closest('div').querySelector('.invalid-feedback-custom')
+            || field.parentElement.querySelector('.invalid-feedback-custom');
+        if (feedback) feedback.classList.toggle('show', !valid);
+    }
+
+    // ── Mot de passe principal ─────────────────────────────────
+    if (pwdFirst) {
+        pwdFirst.addEventListener('input', function () {
+            const ok = checkPasswordRules(this.value);
+            setFieldState(this, ok);
+
+            // Re-vérifier la confirmation si déjà saisie
+            if (pwdSecond && pwdSecond.value.length > 0) {
+                setFieldState(pwdSecond, pwdSecond.value === this.value);
+            }
+        });
+    }
+
+    // ── Confirmation du mot de passe ────────────────────────────
+    if (pwdSecond) {
+        pwdSecond.addEventListener('input', function () {
+            const match = pwdFirst && this.value === pwdFirst.value && this.value.length > 0;
+            setFieldState(this, match);
+        });
+    }
+
+    // ── Validation générique des autres champs requis ──────────
+    function validateField(field) {
+        const valid = field.checkValidity();
+        setFieldState(field, valid);
+        return valid;
+    }
+
+    const champsRequis = document.querySelectorAll('.champ-requis:not([name$="[plainPassword][first]"]):not([name$="[plainPassword][second]"])');
+    champsRequis.forEach(function (champ) {
+        champ.addEventListener('blur', function () {
+            validateField(champ);
+        });
+        champ.addEventListener('input', function () {
+            if (champ.classList.contains('is-invalid')) {
+                validateField(champ);
+            }
+        });
+    });
+
+    // ── Validation à la soumission du formulaire ────────────────
+    const form = document.getElementById('registerForm');
+    const globalError = document.getElementById('global-error');
+
+    form.addEventListener('submit', function (e) {
+        let formValid = true;
+
+        champsRequis.forEach(function (champ) {
+            if (!validateField(champ)) formValid = false;
+        });
+
+        if (pwdFirst) {
+            const ok = checkPasswordRules(pwdFirst.value);
+            setFieldState(pwdFirst, ok);
+            if (!ok) formValid = false;
+        }
+
+        if (pwdSecond) {
+            const match = pwdFirst && pwdSecond.value === pwdFirst.value && pwdSecond.value.length > 0;
+            setFieldState(pwdSecond, match);
+            if (!match) formValid = false;
+        }
+
+        if (!formValid) {
+            e.preventDefault();
+            globalError.classList.remove('d-none');
+            globalError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            globalError.classList.add('d-none');
+        }
+    });
+
+});
+</script>
+{% endblock %}

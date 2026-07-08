@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Panier — GameStore
+{% endblock %}
+
+{% block body %}
+	<div class="container mt-4">
+		<h1 class="mb-4">🛒 Mon Panier</h1>
+
+		{% if items|length > 0 %}
+			<div
+				class="row">
+				{# Colonne de gauche : Tableau des produits #}
+				<div class="col-md-8">
+					<div class="table-responsive shadow-sm rounded bg-white">
+						<table class="table align-middle mb-0">
+							<thead class="table-dark">
+								<tr>
+									<th>Produit</th>
+									<th>Prix Unit.</th>
+									<th class="text-center" style="width: 140px;">Quantité</th>
+									<th>Total</th>
+									<th class="text-center">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for item in items %}
+									<tr>
+										<td>
+											<h6 class="mb-0">{{ item.produit.nom }}</h6>
+											<small class="text-muted">{{ item.produit.marque }}</small>
+										</td>
+										<td>{{ item.produit.prixTtc }}
+											€</td>
+										<td>
+											<div
+												class="input-group input-group-sm justify-content-center">
+												{# Bouton Moins #}
+												<a href="{{ path('panier_diminuer', {id: item.produit.id}) }}" class="btn btn-outline-secondary">
+													-
+												</a>
+												<span class="input-group-text bg-white px-3 fw-bold">
+													{{ item.quantite }}
+												</span>
+												{# Bouton Plus #}
+												<a href="{{ path('panier_ajouter', {id: item.produit.id}) }}" class="btn btn-outline-secondary">
+													+
+												</a>
+											</div>
+										</td>
+										<td class="fw-bold">{{ item.produit.prixTtc * item.quantite }}
+											€</td>
+										<td
+											class="text-center">
+											{# Bouton Supprimer #}
+											<a href="{{ path('panier_supprimer', {id: item.produit.id}) }}" class="btn btn-sm btn-outline-danger" title="Supprimer l'article">
+												🗑️
+											</a>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				{# Colonne de droite : Encadré de facturation #}
+				<div class="col-md-4">
+					<div class="card shadow-sm border-0 p-4 bg-light rounded">
+						<h4 class="mb-3">Résumé de la commande</h4>
+						<hr>
+						<div class="d-flex justify-content-between align-items-center mb-4">
+							<span class="fs-5">Total TTC :</span>
+							<span class="fs-4 fw-bold text-primary">{{ total }}
+								€</span>
+						</div>
+
+						{#  Enrobage dans un formulaire pour envoyer du POST #}
+						<form action="/commande/valider" method="POST" class="w-100">
+							<button type="submit" class="btn btn-success w-100 btn-lg shadow-sm">
+								💳 Procéder au paiement
+							</button>
+						</form>
+
+						<div class="text-center mt-3">
+							<a href="{{ path('produit_index') }}" class="text-decoration-none small text-muted">
+								← Retourner au catalogue
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% else %}
+			{# Vue Panier Vide #}
+			<div class="card shadow-sm p-5 text-center bg-white rounded">
+				<div class="mb-3">
+					<span class="display-3">🛒</span>
+				</div>
+				<h3>Votre panier est vide</h3>
+				<p class="text-muted">Il semblerait que vous n'ayez pas encore arrêté votre choix sur un jeu vidéo.</p>
+				<div class="mt-4">
+					<a href="{{ path('produit_index') }}" class="btn btn-primary px-4 py-2 shadow-sm">
+						Découvrir le catalogue
+					</a>
+				</div>
+			</div>
+		{% endif %}
+	</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Fiche Client — GameStore
+{% endblock %}
+
+{% block body %}
+	<div class="container mt-4">
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h1 class="h2">👤 Fiche Client :
+				{{ client.prenom }}
+				{{ client.nom|upper }}</h1>
+			<div>
+				{% if is_granted('ROLE_ADMIN') %}
+					<a href="javascript:history.back()" class="btn btn-outline-primary btn-sm">⬅️ Retour Liste Admin</a>
+				{% else %}
+					<a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">⬅️ Retour Espace Gestionnaire</a>
+				{% endif %}
+			</div>
+		</div>
+
+		<div
+			class="row g-4">
+			{# ── BLOC 1 : IDENTIFICATION ── #}
+			<div class="col-md-6">
+				<div class="card shadow-sm h-100">
+					<div class="card-header bg-dark text-white fw-bold">📋 Informations Personnelles</div>
+					<div class="card-body">
+						<table class="table table-borderless align-middle mb-0">
+							<tr class="border-bottom">
+								<th class="py-2 text-muted" style="width: 40%;">ID Interne :</th>
+								<td class="py-2">#{{ client.id }}</td>
+							</tr>
+							<tr class="border-bottom">
+								<th class="py-2 text-muted">Civilité :</th>
+								<td class="py-2">{{ client.civilite|capitalize }}</td>
+							</tr>
+							<tr class="border-bottom">
+								<th class="py-2 text-muted">Adresse Email :</th>
+								<td class="py-2">
+									<a href="mailto:{{ client.email }}">{{ client.email }}</a>
+								</td>
+							</tr>
+							<tr class="border-bottom">
+								<th class="py-2 text-muted">Téléphone :</th>
+								<td class="py-2">{{ client.telephone ? client.telephone : 'Non renseigné' }}</td>
+							</tr>
+							<tr>
+								<th class="py-2 text-muted">Type de profil :</th>
+								<td class="py-2">
+									{% if client.typeCompte == 'professionnel' %}
+										<span class="badge bg-info text-dark">🏢 Professionnel</span>
+									{% else %}
+										<span class="badge bg-secondary">👤 Particulier</span>
+									{% endif %}
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			{# ── BLOC 2 : RGPD CONNECTÉ ── #}
+			<div class="col-md-6">
+				<div class="card shadow-sm h-100">
+					<div class="card-header bg-warning text-dark fw-bold">🔏 Préférences de Confidentialité (RGPD)</div>
+					<div class="card-body">
+						<p class="text-muted small mb-3">Statut des consentements marketing et légaux du client :</p>
+
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item d-flex justify-content-between align-middle bg-transparent px-0 py-3">
+								<div>
+									<strong class="d-block">📧 Offres par Email</strong>
+									<small class="text-muted">Newsletter et promotions GameStore</small>
+								</div>
+								<div>
+									{% if client.accepteOffresEmail %}
+										<span class="badge bg-success fs-6">✅ Accepté</span>
+									{% else %}
+										<span class="badge bg-danger fs-6">❌ Refusé</span>
+									{% endif %}
+								</div>
+							</li>
+							<li class="list-group-item d-flex justify-content-between align-middle bg-transparent px-0 py-3">
+								<div>
+									<strong class="d-block">📱 Offres par SMS</strong>
+									<small class="text-muted">Alertes flash et suivi sur mobile</small>
+								</div>
+								<div>
+									{% if client.accepteOffresSms %}
+										<span class="badge bg-success fs-6">✅ Accepté</span>
+									{% else %}
+										<span class="badge bg-danger fs-6">❌ Refusé</span>
+									{% endif %}
+								</div>
+							</li>
+							<li class="list-group-item d-flex justify-content-between align-middle bg-transparent px-0 py-3">
+								<div>
+									<strong class="d-block">🤝 Partage Partenaires</strong>
+									<small class="text-muted">Transmission aux studios partenaires</small>
+								</div>
+								<div>
+									{% if client.accepteOffresPartenaires %}
+										<span class="badge bg-success fs-6">✅ Accepté</span>
+									{% else %}
+										<span class="badge bg-danger fs-6">❌ Refusé</span>
+									{% endif %}
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{# ── BLOC 3 : CARNET D'ADRESSES ── #}
+		<div class="row g-4 mt-2">
+			<div class="col-12">
+				<div class="card shadow-sm">
+					<div class="card-header bg-primary text-white fw-bold">📍 Carnet d'adresses du client</div>
+					<div class="card-body">
+						{% if client.adresses is empty %}
+							<div class="alert alert-warning mb-0">
+								⚠️ Ce client n'a pas encore enregistré d'adresse.
+							</div>
+						{% else %}
+							<div class="row g-3">
+								{% for adresse in client.adresses %}
+									<div class="col-md-4">
+										<div class="card h-100 bg-light border-secondary-subtle">
+											<div class="card-body">
+												<h6 class="card-title fw-bold text-secondary">
+													🏠 Adresse
+													{{ loop.index }}
+													<span class="badge bg-dark text-white ms-1 small" style="font-size: 0.7rem;">
+														{{ adresse.type|upper }}
+													</span>
+												</h6>
+												<p class="card-text mb-0 mt-2">
+													<strong>{{ client.prenom }}
+														{{ client.nom|upper }}</strong><br>
+													{{ adresse.numero }}
+													{{ adresse.voie }}<br>
+													{% if adresse.complementAdresse1 %}
+														{{ adresse.complementAdresse1 }}<br>
+													{% endif %}
+													{{ adresse.codePostal }}
+													{{ adresse.ville|upper }}
+												</p>
+											</div>
+										</div>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

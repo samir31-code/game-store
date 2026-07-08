@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ produit.nom }} — GameStore{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-8">
+
+        {# ── En-tête produit ── #}
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ path('produit_index') }}">Catalogue</a>
+                </li>
+                {% if produit.categorie %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('produit_index', {categorie: produit.categorie.id}) }}">
+                            {{ produit.categorie.nom }}
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="breadcrumb-item active">{{ produit.nom }}</li>
+            </ol>
+        </nav>
+
+        <h1>{{ produit.nom }}</h1>
+
+        <p class="text-muted">
+            {% if produit.categorie %}
+                📁 {{ produit.categorie.nom }}
+            {% endif %}
+            {% if produit.marque %}
+                — 🏭 {{ produit.marque }}
+            {% endif %}
+        </p>
+
+        {# Étiquettes #}
+        <div class="mb-3">
+            {% for etiquette in produit.etiquettes %}
+                <span class="badge bg-info me-1">{{ etiquette.nom }}</span>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        {# Description #}
+        {% if produit.description %}
+            <div class="mb-4">
+                <h5>📝 Description</h5>
+                <p>{{ produit.description|nl2br }}</p>
+            </div>
+        {% endif %}
+
+        {# Caractéristiques #}
+        <div class="mb-4">
+            <h5>📦 Caractéristiques</h5>
+            <table class="table table-bordered w-75">
+                {% if produit.marque %}
+                <tr>
+                    <th>Marque</th>
+                    <td>{{ produit.marque }}</td>
+                </tr>
+                {% endif %}
+                {% if produit.dimensionL %}
+                <tr>
+                    <th>Dimensions (L x H x P)</th>
+                    <td>
+                        {{ produit.dimensionL }} x
+                        {{ produit.dimensionH }} x
+                        {{ produit.dimensionP }} cm
+                    </td>
+                </tr>
+                {% endif %}
+                {% if produit.poids %}
+                <tr>
+                    <th>Poids</th>
+                    <td>{{ produit.poids }} kg</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <th>Référence</th>
+                    <td>{{ produit.referenceProduit }}</td>
+                </tr>
+            </table>
+        </div>
+
+        {# Prix #}
+        <div class="mb-4">
+            <h5>💰 Prix</h5>
+            <table class="table table-bordered w-75">
+                <tr>
+                    <th>Prix HT</th>
+                    <td>{{ produit.prixHt }} €</td>
+                </tr>
+                <tr>
+                    <th>TVA</th>
+                    <td>{{ produit.tvaProduit }} %</td>
+                </tr>
+                <tr class="table-primary">
+                    <th>Prix TTC</th>
+                    <td class="fw-bold fs-5">{{ produit.prixTtc }} €</td>
+                </tr>
+            </table>
+        </div>
+
+        {# Stock #}
+        <div class="mb-4">
+            {% if produit.etatStock == 'disponible' %}
+                <span class="badge bg-success fs-6">
+                    ✅ En stock ({{ produit.quantiteStock }} disponibles)
+                </span>
+            {% elseif produit.etatStock == 'sur_commande' %}
+                <span class="badge bg-warning text-dark fs-6">
+                    📦 Sur commande
+                </span>
+            {% else %}
+                <span class="badge bg-danger fs-6">
+                    ❌ Rupture de stock
+                </span>
+            {% endif %}
+        </div>
+
+        {# Boutons action #}
+        <div class="d-flex gap-2 mt-4">
+            {% if is_granted('ROLE_CLIENT') and produit.etatStock == 'disponible' %}
+                <a href="{{ path('panier_ajouter', {id: produit.id}) }}"
+                   class="btn btn-primary btn-lg">
+                    🛒 Ajouter au panier
+                </a>
+            {% elseif not is_granted('ROLE_USER') %}
+                <a href="{{ path('app_login') }}"
+                   class="btn btn-outline-primary btn-lg">
+                    🔐 Connectez-vous pour commander
+                </a>
+            {% endif %}
+            <a href="{{ path('produit_index') }}"
+               class="btn btn-outline-secondary btn-lg">
+                ← Retour au catalogue
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

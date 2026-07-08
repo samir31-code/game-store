@@ -1,0 +1,188 @@
+{% extends 'base.html.twig' %}
+{% block title %}Administration — GameStore{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">🛡️ Administration du site</h1>
+
+{# ── Statistiques ── #}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary shadow">
+            <div class="card-body text-center">
+                <h2>{{ nb_users }}</h2>
+                <p class="mb-0">👤 Utilisateurs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success shadow">
+            <div class="card-body text-center">
+                <h2>{{ nb_commandes }}</h2>
+                <p class="mb-0">📦 Commandes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-dark bg-warning shadow">
+            <div class="card-body text-center">
+                <h2>{{ nb_produits }}</h2>
+                <p class="mb-0">🎮 Produits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Accès rapides ── #}
+<h2 class="mb-3">⚡ Gestion du site</h2>
+<div class="row g-3 mb-5">
+    <div class="col-md-3">
+        <a href="{{ path('gestionnaire_commande_index') }}"
+           class="btn btn-success w-100 py-3">
+            📋 Gérer les commandes
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('admin_produit_index') }}"
+           class="btn btn-warning w-100 py-3">
+            ⚙️ Gérer les produits
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('webmaster_categorie_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            📁 Gérer les catégories
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('webmaster_etiquette_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            🏷️  Gérer les étiquettes
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('webmaster_page_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            📄  Gérer les pages
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('gestionnaire_stock_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            📦 Gérer le stock
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('webmaster_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            🌐 Espace Webmaster
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('gestionnaire_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            📦 Espace Gestionnaire
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('admin_produit_index') }}"
+           class="btn btn-outline-dark w-100 py-3">
+            ⚙️ Espace Admin Produit
+        </a>
+    </div>
+
+</div>
+
+{# ── Gestion des comptes ── #}
+<h2 class="mb-3">👥 Gestion des comptes</h2>
+
+{# Onglets par rôle #}
+<ul class="nav nav-tabs mb-4" id="comptesTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#tab-clients">
+            🛒 Clients
+            <span class="badge bg-primary ms-1">{{ clients|length }}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-webmasters">
+            🌐 Webmasters
+            <span class="badge bg-info ms-1">{{ webmasters|length }}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-gestionnaires">
+            📦 Gestionnaires
+            <span class="badge bg-warning text-dark ms-1">{{ gestionnaires|length }}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-adminproduits">
+            ⚙️ Admin Produits
+            <span class="badge bg-secondary ms-1">{{ adminProduits|length }}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-admins">
+            🛡️ Admins
+            <span class="badge bg-danger ms-1">{{ admins|length }}</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    {# ── Clients ── #}
+    <div class="tab-pane fade show active" id="tab-clients">
+        {% include 'admin/_table_users.html.twig' with {
+            'users': clients,
+            'titre': '🛒 Clients',
+            'show_add': false
+        } %}
+    </div>
+
+    {# ── Webmasters ── #}
+    <div class="tab-pane fade" id="tab-webmasters">
+        {% include 'admin/_table_users.html.twig' with {
+            'users': webmasters,
+            'titre': '🌐 Webmasters',
+            'show_add': true,
+            'role': 'ROLE_WEBMASTER',
+            'label': 'webmaster'
+        } %}
+    </div>
+
+    {# ── Gestionnaires ── #}
+    <div class="tab-pane fade" id="tab-gestionnaires">
+        {% include 'admin/_table_users.html.twig' with {
+            'users': gestionnaires,
+            'titre': '📦 Gestionnaires',
+            'show_add': true,
+            'role': 'ROLE_GESTIONNAIRE_COMMANDE',
+            'label': 'gestionnaire'
+        } %}
+    </div>
+
+    {# ── Admin Produits ── #}
+    <div class="tab-pane fade" id="tab-adminproduits">
+        {% include 'admin/_table_users.html.twig' with {
+            'users': adminProduits,
+            'titre': '⚙️ Admin Produits',
+            'show_add': true,
+            'role': 'ROLE_ADMIN_PRODUIT',
+            'label': 'admin produit'
+        } %}
+    </div>
+
+    {# ── Admins ── #}
+    <div class="tab-pane fade" id="tab-admins">
+        {% include 'admin/_table_users.html.twig' with {
+            'users': admins,
+            'titre': '🛡️ Admins',
+            'show_add': true,
+            'role': 'ROLE_ADMIN',
+            'label': 'admin'
+        } %}
+    </div>
+
+</div>
+{% endblock %}

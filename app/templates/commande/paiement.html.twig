@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Validation de commande{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row g-5">
+        <div class="col-md-7 col-lg-8">
+            <h4 class="mb-3">🏠 Finalisation de votre commande</h4>
+
+            <form method="post" action="{{ path('commande_valider') }}">
+                <div class="mb-4">
+                    <label for="adresse_livraison" class="form-label">Sélectionner une adresse de livraison</label>
+                    <select class="form-select" id="adresse_livraison" name="adresse_livraison" required>
+                        {% for adresse in adresses %}
+                            <option value="{{ adresse.id }}">
+                                {{ adresse.rue }}, {{ adresse.codePostal }} {{ adresse.ville }} ({{ adresse.pays }})
+                            </option>
+                        {% else %}
+                            <option value="">Utiliser l'adresse principale par défaut</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr class="my-4">
+
+                <button class="w-100 btn btn-primary btn-lg fw-bold" type="submit">
+                    💳 Passer au paiement sécurisé Stripe ({{ total_ttc }} €)
+                </button>
+            </form>
+        </div>
+
+        <div class="col-md-5 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Récapitulatif</h5>
+                    <p class="card-text d-flex justify-content-between mt-3">
+                        <span>Total à régler :</span>
+                        <strong class="text-success">{{ total_ttc }} €</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

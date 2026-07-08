@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+{% block title %}Catégories — GameStore{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>📁 Catégories</h1>
+    <a href="{{ path('webmaster_categorie_new') }}" class="btn btn-success">
+        ➕ Nouvelle catégorie
+    </a>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for categorie in categories %}
+        <tr>
+            <td><strong>{{ categorie.nom }}</strong></td>
+            <td>{{ categorie.description }}</td>
+            <td>
+                <a href="{{ path('webmaster_categorie_edit', {id: categorie.id}) }}"
+                   class="btn btn-warning btn-sm">✏️ Modifier</a>
+                <form method="post"
+                      action="{{ path('webmaster_categorie_delete', {id: categorie.id}) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Supprimer cette catégorie ?')">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('delete' ~ categorie.id) }}">
+                    <button class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">
+                    Aucune catégorie pour le moment.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('admin_index') }}" class="btn btn-secondary">← Retour</a>
+{% endblock %}

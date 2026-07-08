@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Produits — GameStore{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>🎮 Gestion des produits</h1>
+    <a href="{{ path('admin_produit_new') }}" class="btn btn-success">
+        ➕ Nouveau produit
+    </a>
+</div>
+
+{# ── Barre de recherche ── #}
+<form method="get" action="{{ path('admin_produit_index') }}" class="mb-4">
+    <div class="input-group">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="🔍 Rechercher par nom, référence, marque, catégorie..."
+               value="{{ recherche ?? '' }}">
+        <button type="submit" class="btn btn-primary">
+            🔍 Rechercher
+        </button>
+        {% if recherche %}
+            <a href="{{ path('admin_produit_index') }}" class="btn btn-outline-secondary">
+                ✖ Effacer
+            </a>
+        {% endif %}
+    </div>
+</form>
+
+{# ── Message résultats ── #}
+{% if recherche %}
+    <div class="alert alert-info mb-3">
+        {% if produits|length > 0 %}
+            🔍 <strong>{{ produits|length }}</strong> résultat(s) pour
+            "<strong>{{ recherche }}</strong>"
+        {% else %}
+            ❌ Aucun résultat pour "<strong>{{ recherche }}</strong>"
+        {% endif %}
+        — <a href="{{ path('admin_produit_index') }}">Voir tous les produits</a>
+    </div>
+{% endif %}
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Référence</th>
+            <th>Nom</th>
+            <th>Catégorie</th>
+            <th>Prix HT</th>
+            <th>Prix TTC</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produit in produits %}
+        <tr>
+            <td>{{ produit.referenceProduit }}</td>
+            <td>{{ produit.nom }}</td>
+            <td>{{ produit.categorie ? produit.categorie.nom : '-' }}</td>
+            <td>{{ produit.prixHt }} €</td>
+            <td>{{ produit.prixTtc }} €</td>
+            <td>
+                {% if produit.etatStock == 'disponible' %}
+                    <span class="badge bg-success">{{ produit.quantiteStock }}</span>
+                {% else %}
+                    <span class="badge bg-danger">Rupture</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ path('admin_produit_edit', {id: produit.id}) }}"
+                   class="btn btn-warning btn-sm">✏️ Modifier</a>
+
+                {# Supprimer uniquement pour ROLE_ADMIN_SITE #}
+                {% if is_granted('ROLE_ADMIN_SITE') %}
+                <form method="post"
+                      action="{{ path('admin_produit_delete', {id: produit.id}) }}"
+                      onsubmit="return confirm('Supprimer ce produit ?')">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('delete' ~ produit.id) }}">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        🗑️ Supprimer
+                    </button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    Aucun produit pour le moment.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

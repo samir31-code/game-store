@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+{% block title %}Messages — Webmaster{% endblock %}
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>📧 Messages envoyés</h1>
+    <a href="{{ path('webmaster_user_index') }}" class="btn btn-primary">
+        ✉️ Envoyer un message
+    </a>
+</div>
+
+{% if messages_envoyes is empty %}
+    <div class="alert alert-info">
+        Vous n'avez pas encore envoyé de message.
+        <a href="{{ path('webmaster_user_index') }}">
+            Sélectionner un client
+        </a>
+    </div>
+{% else %}
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Destinataire</th>
+                <th>Sujet</th>
+                <th>Date d'envoi</th>
+                <th>Lu</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message in messages_envoyes %}
+            <tr>
+                <td>
+                    {{ message.destinataire.prenom }}
+                    {{ message.destinataire.nom }}
+                    <br>
+                    <small class="text-muted">{{ message.destinataire.email }}</small>
+                </td>
+                <td>{{ message.sujet }}</td>
+                <td>{{ message.dateEnvoi|date('d/m/Y H:i') }}</td>
+                <td>
+                    {% if message.lu %}
+                        <span class="badge bg-success">✅ Lu</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">⏳ Non lu</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+<a href="{{ path('webmaster_index') }}" class="btn btn-secondary mt-3">← Retour</a>
+{% endblock %}
