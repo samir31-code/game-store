@@ -3,27 +3,96 @@
 {% block title %}{{ produit.nom }} — GameStore{% endblock %}
 
 {% block body %}
+{# Fil d'Ariane en haut de page #}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('produit_index') }}">Catalogue</a>
+        </li>
+        {% if produit.categorie %}
+            <li class="breadcrumb-item">
+                <a href="{{ path('produit_index', {categorie: produit.categorie.id}) }}">
+                    {{ produit.categorie.nom }}
+                </a>
+            </li>
+        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page">{{ produit.nom }}</li>
+    </ol>
+</nav>
+
 <div class="row">
-    <div class="col-md-8">
-
-        {# ── En-tête produit ── #}
-        <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{{ path('produit_index') }}">Catalogue</a>
-                </li>
-                {% if produit.categorie %}
-                    <li class="breadcrumb-item">
-                        <a href="{{ path('produit_index', {categorie: produit.categorie.id}) }}">
-                            {{ produit.categorie.nom }}
-                        </a>
-                    </li>
+    {# ════════════════════════════════════════════════════════════ #}
+    {# ── Colonne Gauche : Carrousel d'images ──────────────────── #}
+    {# ════════════════════════════════════════════════════════════ #}
+    <div class="col-md-5 mb-4">
+        {# Récupération des images nettoyées #}
+        {% set images = [] %}
+        {% if produit.image %}
+            {% for img in produit.image|split(',') %}
+                {% if img|trim is not empty %}
+                    {% set images = images|merge([img|trim]) %}
                 {% endif %}
-                <li class="breadcrumb-item active">{{ produit.nom }}</li>
-            </ol>
-        </nav>
+            {% endfor %}
+        {% endif %}
 
-        <h1>{{ produit.nom }}</h1>
+        {% if images|length > 0 %}
+            <div id="productCarousel" class="carousel slide border rounded shadow-sm p-3 bg-white" data-bs-ride="carousel">
+
+                {# Indicateurs (petits traits sous le carrousel) #}
+                {% if images|length > 1 %}
+                    <div class="carousel-indicators">
+                        {% for img in images %}
+                            <button type="button"
+                                    data-bs-target="#productCarousel"
+                                    data-bs-slide-to="{{ loop.index0 }}"
+                                    class="{{ loop.first ? 'active' : '' }}"
+                                    aria-current="{{ loop.first ? 'true' : 'false' }}"
+                                    aria-label="Slide {{ loop.index }}"></button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# Liste des images #}
+                <div class="carousel-inner">
+                    {% for img in images %}
+                        <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                            <img src="{{ asset('images/produits/' ~ img) }}"
+                                 class="d-block w-100"
+                                 alt="{{ produit.nom }}"
+                                 style="height: 380px; object-fit: contain;">
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# Flèches de navigation (affichées uniquement si > 1 image) #}
+                {% if images|length > 1 %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                        <span class="visually-hidden">Précédent</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                        <span class="visually-hidden">Suivant</span>
+                    </button>
+                {% endif %}
+
+            </div>
+        {% else %}
+            {# Image par défaut si le champ image est vide #}
+            <div class="border rounded shadow-sm p-3 bg-white text-center">
+                <img src="{{ asset('images/logo.png') }}"
+                     class="img-fluid"
+                     alt="{{ produit.nom }}"
+                     style="height: 380px; object-fit: contain;">
+            </div>
+        {% endif %}
+    </div>
+
+    {# ════════════════════════════════════════════════════════════ #}
+    {# ── Colonne Droite : Informations du produit ─────────────── #}
+    {# ════════════════════════════════════════════════════════════ #}
+    <div class="col-md-7">
+        <h1 class="mb-2">{{ produit.nom }}</h1>
 
         <p class="text-muted">
             {% if produit.categorie %}
@@ -34,7 +103,7 @@
             {% endif %}
         </p>
 
-        {# Étiquettes #}
+        {# Étiquettes / Badges #}
         <div class="mb-3">
             {% for etiquette in produit.etiquettes %}
                 <span class="badge bg-info me-1">{{ etiquette.nom }}</span>
@@ -54,10 +123,10 @@
         {# Caractéristiques #}
         <div class="mb-4">
             <h5>📦 Caractéristiques</h5>
-            <table class="table table-bordered w-75">
+            <table class="table table-bordered">
                 {% if produit.marque %}
                 <tr>
-                    <th>Marque</th>
+                    <th style="width: 35%;">Marque</th>
                     <td>{{ produit.marque }}</td>
                 </tr>
                 {% endif %}
@@ -87,9 +156,9 @@
         {# Prix #}
         <div class="mb-4">
             <h5>💰 Prix</h5>
-            <table class="table table-bordered w-75">
+            <table class="table table-bordered">
                 <tr>
-                    <th>Prix HT</th>
+                    <th style="width: 35%;">Prix HT</th>
                     <td>{{ produit.prixHt }} €</td>
                 </tr>
                 <tr>
@@ -120,7 +189,7 @@
             {% endif %}
         </div>
 
-        {# Boutons action #}
+        {# Boutons d'action #}
         <div class="d-flex gap-2 mt-4">
             {% if is_granted('ROLE_CLIENT') and produit.etatStock == 'disponible' %}
                 <a href="{{ path('panier_ajouter', {id: produit.id}) }}"

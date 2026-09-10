@@ -73,6 +73,9 @@ class Produit
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $dateModification = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->etiquettes = new ArrayCollection();
@@ -299,6 +302,18 @@ class Produit
         return $this;
     }
 
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
     #[ORM\PrePersist]
     public function setDateCreationValue(): void
     {
@@ -310,5 +325,4 @@ class Produit
     {
         $this->dateModification = new \DateTimeImmutable();
     }
-
 }

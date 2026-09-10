@@ -41,6 +41,23 @@
     {% for produit in produits %}
     <div class="col-md-3">
         <div class="card h-100 shadow-sm">
+
+            {# Extraction de la première image #}
+            {% set premiere_image = produit.image ? (produit.image|split(',')[0]|trim) : '' %}
+
+            {% if premiere_image is not empty %}
+                <img src="{{ asset('images/produits/' ~ premiere_image) }}"
+                     class="card-img-top p-3"
+                     alt="{{ produit.nom }}"
+                     style="height: 200px; object-fit: contain;">
+            {% else %}
+                {# Image de remplacement #}
+                <img src="{{ asset('images/logo.png') }}"
+                     class="card-img-top p-3"
+                     alt="{{ produit.nom }}"
+                     style="height: 200px; object-fit: contain;">
+            {% endif %}
+
             <div class="card-body">
                 <span class="badge bg-secondary mb-2">
                     {{ produit.categorie ? produit.categorie.nom : '-' }}
@@ -60,7 +77,9 @@
         </div>
     </div>
     {% else %}
-        <p class="text-muted">Aucun produit disponible pour le moment.</p>
+        <div class="col-12">
+            <p class="text-muted">Aucun produit disponible pour le moment.</p>
+        </div>
     {% endfor %}
 </div>
 

@@ -1,187 +1,252 @@
 <!DOCTYPE html>
 <html lang="fr">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>
-			{% block title %}GameStore
-			{% endblock %}
-		</title>
-		{# Bootstrap 5 pour le style #}
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-		{% block stylesheets %}
-			<style>
-				/* Couleur bleue exacte de votre prix*/
-				.text-price-blue {
-					color: var(--couleur-prix) !important;
-				}
-				/* Effet au survol des liens du footer */
-				.footer-link {
-					color: #ffffff !important;
-					transition: color 0.2s ease-in-out, padding-left 0.2s ease-in-out;
-				}
-				.footer-link:hover {
-					color: #0066ff !important; /* Couleur jaune/warning en survol */
-					padding-left: 4px;
-				}
-			</style>
-		{% endblock %}
-	</head>
-	{# On transforme le body en conteneur Flex vertical prenant toute la hauteur de l'écran #}
-	<body
-		class="d-flex flex-column min-vh-100">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block title %}GameStore{% endblock %}
+        </title>
+        {# Bootstrap 5 et Icons #}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        {% block stylesheets %}
+            <style>
+                /* Couleur bleue exacte du prix */
+                .text-price-blue {
+                    color: var(--couleur-prix) !important;
+                }
+                /* Effet au survol des liens du footer */
+                .footer-link {
+                    color: #ffffff !important;
+                    transition: color 0.2s ease-in-out, padding-left 0.2s ease-in-out;
+                }
+                .footer-link:hover {
+                    color: #0066ff !important;
+                    padding-left: 4px;
+                }
+            </style>
+        {% endblock %}
+    </head>
 
-		{# ── Barre de navigation ── #}
-		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-			<div class="container">
-				<a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
-					🎮 GameStore
-				</a>
-				<div class="navbar-nav ms-auto align-items-center">
-					<a class="nav-link" href="{{ path('produit_index') }}">
-						Catalogue
-					</a>
+    <body class="d-flex flex-column min-vh-100">
 
-					{# ✅ MODIFICATION : Le panier est visible hors-connexion ET pour le ROLE_CLIENT #}
-					{% if not app.user or is_granted('ROLE_CLIENT') %}
-						{# 1. On calcule le total des quantités directement depuis la session #}
-						{% set total_articles = 0 %}
-						{% for id, quantite in app.session.get('panier', []) %}
-							{% set total_articles = total_articles + quantite %}
-						{% endfor %}
+        {# ── Barre de navigation ── #}
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
+                    🎮 GameStore
+                </a>
 
-						{# 2. On affiche le lien avec le badge Bootstrap #}
-						<a class="nav-link d-flex align-items-center" href="{{ path('panier_voir') }}">
-							🛒 Panier
-							{% if total_articles > 0 %}
-								<span class="badge bg-danger rounded-pill ms-1">
-									{{ total_articles }}
-								</span>
-							{% endif %}
-						</a>
-					{% endif %}
+                {# Bouton Hamburger pour mobile et tablette #}
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Basculer la navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-					{% if app.user %}
-						{# Mon compte — tous les connectés #}
-						<a class="nav-link" href="{{ path('compte_index') }}">
-							👤 Mon compte
-						</a>
+                {# Liens du menu #}
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('produit_index') }}">Catalogue</a>
+                        </li>
 
-						{# Webmaster ── #}
-						{% if is_granted('ROLE_WEBMASTER') and not is_granted('ROLE_ADMIN_PRODUIT') %}
-							<a class="nav-link text-info" href="{{ path('webmaster_index') }}">
-								🌐 Webmaster
-							</a>
-						{% endif %}
+                        {% if not app.user or is_granted('ROLE_CLIENT') %}
+                            {% set total_articles = 0 %}
+                            {% for id, quantite in app.session.get('panier', []) %}
+                                {% set total_articles = total_articles + quantite %}
+                            {% endfor %}
 
-						{# Gestionnaire commandes ── #}
-						{% if is_granted('ROLE_GESTIONNAIRE_COMMANDE') and not is_granted('ROLE_ADMIN_PRODUIT') %}
-							<a class="nav-link text-warning" href="{{ path('gestionnaire_index') }}">
-								📦 Gestionnaire
-							</a>
-						{% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center" href="{{ path('panier_voir') }}">
+                                    🛒 Panier
+                                    {% if total_articles > 0 %}
+                                        <span class="badge bg-danger rounded-pill ms-1">
+                                            {{ total_articles }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endif %}
 
-						{# Admin produit ── #}
-						{% if is_granted('ROLE_ADMIN_PRODUIT') and not is_granted('ROLE_ADMIN') %}
-							<a class="nav-link text-warning" href="{{ path('admin_produit_index') }}">
-								⚙️ Admin Produits
-							</a>
-						{% endif %}
+                        {% if app.user %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('compte_index') }}">
+                                    👤 Mon compte
+                                </a>
+                            </li>
 
-						{# Admin ── #}
-						{% if is_granted('ROLE_ADMIN') %}
-							<a class="nav-link text-danger" href="{{ path('admin_index') }}">
-								🛡️ Admin
-							</a>
-						{% endif %}
+                            {% if is_granted('ROLE_WEBMASTER') and not is_granted('ROLE_ADMIN_PRODUIT') %}
+                                <li class="nav-item">
+                                    <a class="nav-link text-info" href="{{ path('webmaster_index') }}">
+                                        🌐 Webmaster
+                                    </a>
+                                </li>
+                            {% endif %}
 
-						<a class="nav-link text-danger ms-2" href="{{ path('app_logout') }}">
-							Déconnexion
-						</a>
-					{% else %}
-						<a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
-						<a class="nav-link" href="{{ path('app_register') }}">Inscription</a>
-					{% endif %}
-				</div>
-			</div>
-		</nav>
+                            {% if is_granted('ROLE_GESTIONNAIRE_COMMANDE') and not is_granted('ROLE_ADMIN_PRODUIT') %}
+                                <li class="nav-item">
+                                    <a class="nav-link text-warning" href="{{ path('gestionnaire_index') }}">
+                                        📦 Gestionnaire
+                                    </a>
+                                </li>
+                            {% endif %}
 
-		{# ── Messages flash ── #}
-		<div class="container mt-3">
-			{% for type, messages in app.flashes %}
-				{% for message in messages %}
-					<div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible">
-						{{ message }}
-						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-					</div>
-				{% endfor %}
-			{% endfor %}
-		</div>
+                            {% if is_granted('ROLE_ADMIN_PRODUIT') and not is_granted('ROLE_ADMIN') %}
+                                <li class="nav-item">
+                                    <a class="nav-link text-warning" href="{{ path('admin_produit_index') }}">
+                                        ⚙️ Admin Produits
+                                    </a>
+                                </li>
+                            {% endif %}
 
-		{# ── Contenu principal (flex-grow-1 pousse le footer vers le bas) ── #}
-		<main class="container my-4 flex-grow-1"> {% block body %}{% endblock %}
-			</main>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger" href="{{ path('admin_index') }}">
+                                        🛡️ Admin
+                                    </a>
+                                </li>
+                            {% endif %}
 
-			{# ── Pied de page complet & Conforme RGPD ── #}
-			<footer class="bg-dark text-light pt-5 pb-3 border-top border-primary border-3">
-				<div class="container">
-					<div
-						class="row gy-4">
+                            <li class="nav-item">
+                                <a class="nav-link text-danger ms-lg-2" href="{{ path('app_logout') }}">
+                                    Déconnexion
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_register') }}">Inscription</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-						{# Colonne 1 : À propos #}
-						<div class="col-lg-4 col-md-6">
-							<h5 class="text-white fw-bold mb-3">🎮 GameStore</h5>
-							<p class="small text-muted">
-								Votre plateforme de confiance pour l'achat de clés, jeux physiques et accessoires gaming. Vos données sont en sécurité chez nous.
-							</p>
-							<p class="small text-muted mb-0">©
-								{{ 'now'|date('Y') }}
-								GameStore — Tous droits réservés.</p>
-						</div>
+        {# ── Messages flash ── #}
+        <div class="container mt-3">
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
 
-						{# Colonne 2 : Navigation rapide #}
-						<div class="col-lg-4 col-md-6">
-							<h5 class="text-white fw-bold mb-3">Menu</h5>
-							<ul class="list-unstyled small">
-								<li class="mb-2">
-									<a href="{{ path('app_home') }}" class="text-decoration-none footer-link">Accueil</a>
-								</li>
-							</td>
-							<li class="mb-2">
-								<a href="{{ path('produit_index') }}" class="text-decoration-none footer-link">Catalogue de jeux</a>
-							</li>
-						</td>
-						{% if not app.user %}
-							<li class="mb-2">
-								<a href="{{ path('app_login') }}" class="text-decoration-none footer-link">Se connecter / S'inscrire</a>
-							</li>
-						</td>
-					{% else %}
-						<li class="mb-2">
-							<a href="{{ path('compte_index') }}" class="text-decoration-none footer-link">Mon espace client</a>
-						</li>
-					</td>
-				{% endif %}
-			</ul>
-		</body>
-	</html>
-</div>
+        {# ── Contenu principal ── #}
+        <main class="container my-4 flex-grow-1">
+            {% block body %}{% endblock %}
+        </main>
 
-{# Colonne 3 : Obligations Légales & RGPD #}
-<div class="col-lg-4 col-md-12">
-	<h5 class="text-white fw-bold mb-3">🔒 Données & Légal</h5>
-	<ul class="list-unstyled small">
-		<li class="mb-2">
-			<a href="{{ path('app_mentions_legales') }}" class="text-decoration-none footer-link">Mentions Légales</a>
-		</li>
-	</td>
-	<li class="mb-2">
-		<a href="{{ path('app_politique_confidentialite') }}" class="text-decoration-none footer-link">Politique de Confidentialité (RGPD)</a>
-	</li>
-</td>
-<li class="mb-2">
-	<a href="{{ path('app_cgv') }}" class="text-decoration-none footer-link">Conditions Générales de Vente (CGV)</a>
-</li></td><li class="mb-2">
-<a href="#" class="text-decoration-none footer-link" data-bs-toggle="modal" data-bs-target="#cookieModal">
-	🍪 Gestion des Cookies</a></li></td></ul></div></div><hr class="border-secondary my-4"><div class="d-flex flex-column flex-sm-row justify-content-between align-items-center small text-muted"><p class="mb-2 mb-sm-0"><i class="bi bi-shield-check text-success me-1"></i>Site conforme au RGPD (UE 2016/679)</p><div><span class="badge bg-secondary">🇪🇺 Serveurs sécurisés EU (France)</span></div></div></div></footer>{# ── Fenêtre Modal Bootstrap pour les Cookies ── #}<div class="modal fade text-dark" id="cookieModal" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-dark text-light"><h5 class="modal-title" id="cookieModalLabel">🍪 Panneau de gestion des cookies</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><p>GameStore respecte votre vie privée. Nous utilisons uniquement des cookies nécessaires au bon fonctionnement de la boutique (session, panier, sécurité).</p><hr><div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="cookieEssentiel" checked disabled><label class="form-check-label fw-bold" for="cookieEssentiel">Cookies essentiels (Obligatoire)</label><div class="small text-muted">Permettent de sauvegarder votre panier et de rester connecté.</div></div><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="cookieAnalytique" checked><label class="form-check-label fw-bold" for="cookieAnalytique">Mesure d'audience (Optionnel)</label><div class="small text-muted">Nous aide à comprendre comment vous utilisez le catalogue pour l'améliorer.</div></div></div><div class="modal-footer bg-light"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Enregistrer mes choix</button><button type="button" class="btn btn-warning btn-sm fw-bold" data-bs-dismiss="modal">Tout accepter</button></div></div></div></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script></body></html>
+        {# ── Pied de page ── #}
+        <footer class="bg-dark text-light pt-5 pb-3 border-top border-primary border-3">
+            <div class="container">
+                <div class="row gy-4">
+
+                    {# Colonne 1 : À propos #}
+                    <div class="col-lg-4 col-md-6">
+                        <h5 class="text-white fw-bold mb-3">🎮 GameStore</h5>
+                        <p class="small text-muted">
+                            Votre plateforme de confiance pour l'achat de clés, jeux physiques et accessoires gaming. Vos données sont en sécurité chez nous.
+                        </p>
+                        <p class="small text-muted mb-0">
+                            © {{ 'now'|date('Y') }} GameStore — Tous droits réservés.
+                        </p>
+                    </div>
+
+                    {# Colonne 2 : Navigation rapide #}
+                    <div class="col-lg-4 col-md-6">
+                        <h5 class="text-white fw-bold mb-3">Menu</h5>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <a href="{{ path('app_home') }}" class="text-decoration-none footer-link">Accueil</a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ path('produit_index') }}" class="text-decoration-none footer-link">Catalogue de jeux</a>
+                            </li>
+                            {% if not app.user %}
+                                <li class="mb-2">
+                                    <a href="{{ path('app_login') }}" class="text-decoration-none footer-link">Se connecter / S'inscrire</a>
+                                </li>
+                            {% else %}
+                                <li class="mb-2">
+                                    <a href="{{ path('compte_index') }}" class="text-decoration-none footer-link">Mon espace client</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    {# Colonne 3 : Obligations Légales & RGPD #}
+                    <div class="col-lg-4 col-md-12">
+                        <h5 class="text-white fw-bold mb-3">🔒 Données & Légal</h5>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <a href="{{ path('app_mentions_legales') }}" class="text-decoration-none footer-link">Mentions Légales</a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ path('app_politique_confidentialite') }}" class="text-decoration-none footer-link">Politique de Confidentialité (RGPD)</a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ path('app_cgv') }}" class="text-decoration-none footer-link">Conditions Générales de Vente (CGV)</a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="text-decoration-none footer-link" data-bs-toggle="modal" data-bs-target="#cookieModal">
+                                    🍪 Gestion des Cookies
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <hr class="border-secondary my-4">
+
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center small text-muted">
+                    <p class="mb-2 mb-sm-0">
+                        <i class="bi bi-shield-check text-success me-1"></i>Site conforme au RGPD (UE 2016/679)
+                    </p>
+                    <div>
+                        <span class="badge bg-secondary">🇪🇺 Serveurs sécurisés EU (France)</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        {# ── Fenêtre Modal Bootstrap pour les Cookies ── #}
+        <div class="modal fade text-dark" id="cookieModal" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-light">
+                        <h5 class="modal-title" id="cookieModalLabel">🍪 Panneau de gestion des cookies</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>GameStore respecte votre vie privée. Nous utilisons uniquement des cookies nécessaires au bon fonctionnement de la boutique (session, panier, sécurité).</p>
+                        <hr>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="cookieEssentiel" checked disabled>
+                            <label class="form-check-label fw-bold" for="cookieEssentiel">Cookies essentiels (Obligatoire)</label>
+                            <div class="small text-muted">Permettent de sauvegarder votre panier et de rester connecté.</div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="cookieAnalytique" checked>
+                            <label class="form-check-label fw-bold" for="cookieAnalytique">Mesure d'audience (Optionnel)</label>
+                            <div class="small text-muted">Nous aide à comprendre comment vous utilisez le catalogue pour l'améliorer.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Enregistrer mes choix</button>
+                        <button type="button" class="btn btn-warning btn-sm fw-bold" data-bs-dismiss="modal">Tout accepter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# JavaScript de Bootstrap 5 #}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -37,27 +38,37 @@ class RegistrationFormType extends AbstractType
             // ── Email ───────────────────────────────────────────
             ->add('email', EmailType::class, [
                 'label'       => 'Votre adresse email',
-                'constraints' => [new Assert\NotBlank(), new Assert\Email()],
-                'attr'        => ['class' => 'form-control'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Veuillez saisir une adresse email.',
+                    ]),
+                    new Assert\Email([
+                        'message' => 'Veuillez saisir une adresse email valide.',
+                    ]),
+                ],
+                'attr' => ['class' => 'form-control'],
             ])
 
             // ── Mot de passe ────────────────────────────────────
             ->add('plainPassword', RepeatedType::class, [
-                'type'           => PasswordType::class,
-                'mapped'         => false,
-                'first_options'  => [
+                'type'            => PasswordType::class,
+                'mapped'          => false,
+                'first_options'   => [
                     'label' => 'Votre mot de passe',
                     'attr'  => ['class' => 'form-control'],
                 ],
-                'second_options' => [
+                'second_options'  => [
                     'label' => 'Confirmer le mot de passe',
                     'attr'  => ['class' => 'form-control'],
                 ],
-                'constraints' => [
-                    new Assert\NotBlank(),
+                'invalid_message' => 'Les mots de passe ne correspondent pas.',
+                'constraints'     => [
+                    new Assert\NotBlank([
+                        'message' => 'Veuillez renseigner un mot de passe.',
+                    ]),
                     new Assert\Regex([
-                        'pattern' => '/^(?=.*[0-9])(?=.*[A-Z])(?=.*[\W_]).{8,}$/',
-                        'message' => 'Le mot de passe doit contenir 8 caractères minimum, 1 chiffre, 1 majuscule et 1 caractère spécial.',
+                        'pattern' => '/^(?=.*[0-9])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/',
+                        'message' => 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.',
                     ]),
                 ],
             ])
@@ -70,19 +81,44 @@ class RegistrationFormType extends AbstractType
                     'Monsieur' => 'monsieur',
                 ],
                 'placeholder' => 'Sélectionner...',
-                'constraints' => [new Assert\NotBlank()],
-                'attr'        => ['class' => 'form-select'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Veuillez sélectionner votre civilité.',
+                    ]),
+                ],
+                'attr' => ['class' => 'form-select'],
             ])
 
             ->add('nom', TextType::class, [
                 'label'       => 'Nom',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(['min' => 2, 'max' => 100])],
-                'attr'        => ['class' => 'form-control'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le nom est obligatoire.',
+                    ]),
+                    new Assert\Length([
+                        'min'        => 2,
+                        'max'        => 100,
+                        'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères.',
+                        'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
+                ],
+                'attr' => ['class' => 'form-control'],
             ])
+
             ->add('prenom', TextType::class, [
                 'label'       => 'Prénom',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(['min' => 2, 'max' => 100])],
-                'attr'        => ['class' => 'form-control'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le prénom est obligatoire.',
+                    ]),
+                    new Assert\Length([
+                        'min'        => 2,
+                        'max'        => 100,
+                        'minMessage' => 'Le prénom doit contenir au moins {{ limit }} caractères.',
+                        'maxMessage' => 'Le prénom ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
+                ],
+                'attr' => ['class' => 'form-control'],
             ])
 
             // ── Date de naissance ────────────────────────────────
@@ -96,8 +132,16 @@ class RegistrationFormType extends AbstractType
             // ── Téléphone ─────────────────────────────────────────
             ->add('telephone', TelType::class, [
                 'label'       => 'Téléphone portable',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 20])],
-                'attr'        => [
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le numéro de téléphone est obligatoire.',
+                    ]),
+                    new Assert\Regex([
+                        'pattern' => '/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/',
+                        'message' => 'Veuillez saisir un numéro de téléphone valide.',
+                    ]),
+                ],
+                'attr' => [
                     'class'       => 'form-control',
                     'placeholder' => '06 12 34 56 78',
                 ],
@@ -152,13 +196,15 @@ class RegistrationFormType extends AbstractType
                         'message' => 'Vous devez accepter notre politique de confidentialité pour créer un compte.',
                     ]),
                 ],
-                'attr' => ['class' => 'form-check-input champ-requis']
+                'attr' => ['class' => 'form-check-input champ-requis'],
             ])
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => User::class]);
+        $resolver->setDefaults([
+            'data_class' => User::class,
+        ]);
     }
 }
